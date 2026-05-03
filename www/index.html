@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Alarm Cock Clock</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="capacitor.js"></script>
+</head>
+<body>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060a0f;--panel:#0d1520;--border:#1a3a5c;--glow:#00d4ff;--glow2:#ff6b35;--red:#ff3b3b;--green:#00ff9d;--text:#cde8ff;--dim:#3a6080}
+body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.container{display:flex;flex-direction:column;align-items:center;gap:20px;z-index:10;padding:16px;width:100%;max-width:520px}
+.brand{text-align:center;letter-spacing:0.3em;display:flex;flex-direction:column;align-items:center;gap:8px}
+.brand-row{display:flex;align-items:center;gap:14px}
+.brand h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.1rem,5vw,1.8rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow);animation:titlePulse 3s ease-in-out infinite}
+.brand span{font-size:0.6rem;color:var(--dim);letter-spacing:0.4em}
+@keyframes titlePulse{0%,100%{text-shadow:0 0 20px var(--glow)}50%{text-shadow:0 0 40px var(--glow)}}
+.logo-clock{width:54px;height:54px;filter:drop-shadow(0 0 10px rgba(0,212,255,0.7));animation:logoGlow 3s ease-in-out infinite}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(0,212,255,0.7))}50%{filter:drop-shadow(0 0 22px rgba(0,212,255,1))}}
+#logo-hour-hand,#logo-minute-hand,#logo-second-hand{transform-origin:27px 27px}
+.cock-btn{background:transparent;border:1px solid var(--border);color:var(--glow2);font-size:0.6rem;letter-spacing:0.2em;padding:5px 12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;display:flex;align-items:center;gap:6px}
+.clock-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:24px 30px;width:100%;text-align:center;position:relative;box-shadow:0 0 40px rgba(0,212,255,0.08)}
+#clock{font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,12vw,5.5rem);font-weight:700;color:var(--glow);text-shadow:0 0 30px var(--glow);letter-spacing:0.05em;line-height:1}
+#clock.alarm-on{animation:alarmFlash 0.5s ease-in-out infinite}
+@keyframes alarmFlash{0%,100%{color:var(--glow)}50%{color:var(--red);text-shadow:0 0 40px var(--red)}}
+#date{margin-top:10px;font-size:0.7rem;color:var(--dim);letter-spacing:0.25em}
+.alarm-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px;width:100%}
+.section-label{font-size:0.58rem;letter-spacing:0.45em;color:var(--dim);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.alarm-inputs{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+input[type="time"]{background:#070f1a;border:1px solid var(--border);color:var(--glow);font-family:'Orbitron',sans-serif;font-size:1.2rem;padding:10px 12px;border-radius:3px;outline:none;flex:1;min-width:130px}
+input[type="text"]{background:#070f1a;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:10px 12px;border-radius:3px;outline:none;flex:1;min-width:100px}
+input[type="text"]::placeholder{color:var(--dim)}
+.btn{font-family:'Orbitron',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;padding:12px 16px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap}
+.btn-set{background:var(--glow);color:#000;box-shadow:0 0 20px rgba(0,212,255,0.3)}
+.btn-stop{background:var(--red);color:#fff;display:none;animation:btnPulse 0.5s ease-in-out infinite}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 20px rgba(255,59,59,0.4)}50%{box-shadow:0 0 40px rgba(255,59,59,0.8)}}
+.alarm-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto}
+.alarm-item{display:flex;align-items:center;justify-content:space-between;background:rgba(0,212,255,0.04);border:1px solid var(--border);border-radius:3px;padding:10px 12px;gap:8px}
+.alarm-item.active-alarm{border-color:var(--red);animation:itemFlash 0.5s ease-in-out infinite}
+@keyframes itemFlash{0%,100%{background:rgba(255,59,59,0.08)}50%{background:rgba(255,59,59,0.2)}}
+.alarm-time-label{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--glow)}
+.alarm-item.active-alarm .alarm-time-label{color:var(--red)}
+.alarm-label-text{font-size:0.72rem;color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alarm-status{display:flex;align-items:center;gap:8px}
+.toggle{position:relative;width:36px;height:18px}
+.toggle input{display:none}
+.toggle-track{position:absolute;inset:0;background:#0a1825;border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:background 0.3s}
+.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:var(--dim);border-radius:50%;transition:transform 0.3s,background 0.3s}
+.toggle input:checked+.toggle-track{background:rgba(0,212,255,0.15);border-color:var(--glow)}
+.toggle input:checked+.toggle-track::after{transform:translateX(18px);background:var(--glow)}
+.btn-del{background:transparent;border:1px solid #2a1a1a;color:#553333;font-size:0.9rem;width:26px;height:26px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.status-bar{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:0.58rem;color:var(--dim);letter-spacing:0.2em;padding:0 4px}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite;margin-right:6px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.ring-overlay{display:none;position:fixed;inset:0;z-index:200;pointer-events:none;animation:ringOverlay 0.5s ease-in-out infinite}
+.ring-overlay.show{display:block}
+@keyframes ringOverlay{0%,100%{background:rgba(255,59,59,0.04)}50%{background:rgba(255,59,59,0.15)}}
+.no-alarms{text-align:center;color:var(--dim);font-size:0.68rem;letter-spacing:0.2em;padding:18px}
+              </style>
+              <div class="ring-overlay" id="ringOverlay"></div>
+<div class="container">
+  <div class="brand">
+    <div class="brand-row">
+      <svg class="logo-clock" viewBox="0 0 54 54" fill="none">
+        <circle cx="27" cy="27" r="25" stroke="#00d4ff" stroke-width="2" fill="#060a0f"/>
+        <circle cx="27" cy="27" r="21" stroke="#1a3a5c" stroke-width="0.8" fill="none"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(0 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(90 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(180 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(270 27 27)"/>
+        <line id="logo-hour-hand" x1="27" y1="27" x2="27" y2="14" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="logo-minute-hand" x1="27" y1="27" x2="27" y2="10" stroke="#cde8ff" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="logo-second-hand" x1="27" y1="30" x2="27" y2="9" stroke="#ff3b3b" stroke-width="1" stroke-linecap="round"/>
+        <circle cx="27" cy="27" r="2.5" fill="#00d4ff"/>
+        <circle cx="15" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
+        <circle cx="39" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
+      </svg>
+      <h1>ALARM COCK CLOCK</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:4px;">
+      <span>RETRO · DIGITAL · PRECISION</span>
+      <button class="cock-btn" onclick="playCockSound()"><span>🐓</span> COCK SOUND</button>
+    </div>
+  </div>
+  <div class="clock-panel">
+    <div id="clock">00:00:00</div>
+    <div id="date">LOADING...</div>
+  </div>
+  <div class="alarm-panel">
+    <div class="section-label">SET ALARM</div>
+    <div class="alarm-inputs">
+      <input type="time" id="alarmTime">
+      <input type="text" id="alarmLabel" placeholder="Label (optional)">
+      <button class="btn btn-set" onclick="addAlarm()">+ SET</button>
+      <button class="btn btn-stop" id="stopBtn" onclick="stopAlarm()">STOP</button>
+    </div>
+    <div class="section-label" style="margin-top:18px">ALARMS</div>
+    <div class="alarm-list" id="alarmList">
+      <div class="no-alarms" id="noAlarms">[ NO ALARMS SET ]</div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div><span class="status-dot"></span> ONLINE</div>
+    <div id="alarmCount">0 ALARMS</div>
+    <div>v1.0.0</div>
+  </div>
+</div>
+<script>
+let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
+let ringingId=null,audioCtx=null,beepNodes=[];
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent=h+':'+m+':'+s;
+  const days=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('date').textContent=days[now.getDay()]+' · '+String(now.getDate()).padStart(2,'0')+' '+months[now.getMonth()]+' '+now.getFullYear();
+  checkAlarms(h,m,s);
+  syncLogo(now);
+}
+function syncLogo(now){
+  const s=now.getSeconds(),m=now.getMinutes(),h=now.getHours()%12;
+  const sh=document.getElementById('logo-hour-hand');
+  const sm=document.getElementById('logo-minute-hand');
+  const ss=document.getElementById('logo-second-hand');
+  if(sh)sh.style.transform='rotate('+(h*30+m*0.5)+'deg)';
+  if(sm)sm.style.transform='rotate('+(m*6+s*0.1)+'deg)';
+  if(ss)ss.style.transform='rotate('+(s*6)+'deg)';
+}
+function checkAlarms(h,m,s){
+  if(ringingId!==null)return;
+  alarms.forEach(a=>{if(a.enabled&&a.time===h+':'+m&&s==='00')triggerAlarm(a.id);});
+}
+function triggerAlarm(id){
+  ringingId=id;
+  document.getElementById('clock').classList.add('alarm-on');
+  document.getElementById('ringOverlay').classList.add('show');
+  document.getElementById('stopBtn').style.display='inline-block';
+  renderAlarms();playAlarm();
+}
+function stopAlarm(){
+  ringingId=null;
+  document.getElementById('clock').classList.remove('alarm-on');
+  document.getElementById('ringOverlay').classList.remove('show');
+  document.getElementById('stopBtn').style.display='none';
+  stopSound();renderAlarms();
+}
+function playAlarm(){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  function loop(){if(ringingId===null)return;playCockSound(audioCtx);setTimeout(loop,2400);}
+  loop();
+}
+function playCockSound(ctx){
+  const c=ctx||new(window.AudioContext||window.webkitAudioContext)();
+  function note(freq,t,dur,type,vol){
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.type=type;
+    o.frequency.setValueAtTime(freq,c.currentTime+t);
+    o.frequency.exponentialRampToValueAtTime(freq*1.6,c.currentTime+t+dur*0.5);
+    o.frequency.exponentialRampToValueAtTime(freq*0.9,c.currentTime+t+dur);
+    g.gain.setValueAtTime(0,c.currentTime+t);
+    g.gain.linearRampToValueAtTime(vol,c.currentTime+t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+t+dur);
+    o.start(c.currentTime+t);o.stop(c.currentTime+t+dur+0.05);
+    beepNodes.push(o);
+  }
+  note(400,0.00,0.18,'sawtooth',0.35);note(600,0.00,0.18,'triangle',0.15);
+  note(500,0.22,0.14,'sawtooth',0.28);note(800,0.22,0.14,'triangle',0.12);
+  note(350,0.40,0.30,'sawtooth',0.32);note(700,0.40,0.30,'triangle',0.14);
+  note(550,0.74,0.12,'sawtooth',0.22);note(480,0.90,0.55,'sawtooth',0.38);
+  note(900,0.90,0.55,'triangle',0.10);note(300,0.90,0.55,'sine',0.08);
+  if(!ctx)setTimeout(()=>{try{c.close();}catch(e){}},2000);
+}
+function stopSound(){
+  beepNodes.forEach(n=>{try{n.stop();}catch(e){}});
+  beepNodes=[];if(audioCtx){audioCtx.close();audioCtx=null;}
+}
+function addAlarm(){
+  const time=document.getElementById('alarmTime').value;
+  if(!time)return;
+  const label=document.getElementById('alarmLabel').value.trim()||'ALARM';
+  alarms.push({id:Date.now(),time,label,enabled:true});
+  save();renderAlarms();
+  document.getElementById('alarmLabel').value='';
+  document.getElementById('alarmTime').value='';
+}
+function toggleAlarm(id){alarms=alarms.map(a=>a.id===id?{...a,enabled:!a.enabled}:a);save();renderAlarms();}
+function deleteAlarm(id){alarms=alarms.filter(a=>a.id!==id);if(ringingId===id)stopAlarm();save();renderAlarms();}
+function save(){localStorage.setItem('alarms',JSON.stringify(alarms));}
+function renderAlarms(){
+  const list=document.getElementById('alarmList');
+  const enabled=alarms.filter(a=>a.enabled).length;
+  document.getElementById('alarmCount').textContent=enabled+' ALARM'+(enabled!==1?'S':'');
+  document.getElementById('noAlarms').style.display=alarms.length===0?'block':'none';
+  list.querySelectorAll('.alarm-item').forEach(e=>e.remove());
+  alarms.slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(alarm=>{
+    const div=document.createElement('div');
+    div.className='alarm-item'+(ringingId===alarm.id?' active-alarm':'');
+    div.innerHTML='<span class="alarm-time-label">'+alarm.time+'</span><span class="alarm-label-text">'+alarm.label+'</span><div class="alarm-status"><label class="toggle"><input type="checkbox"'+(alarm.enabled?' checked':'')+' onchange="toggleAlarm('+alarm.id+')"><div class="toggle-track"></div></label><button class="btn-del" onclick="deleteAlarm('+alarm.id+')">✕</button></div>';
+    list.appendChild(div);
+  });
+}
+renderAlarms();updateClock();setInterval(updateClock,1000);
+</script>
+</body>
+</html>
