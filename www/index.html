@@ -470,16 +470,18 @@ function startAlarmSound(alarm){
   const vol=alarm?((alarm.volume||80)/100)*0.5:0.4;
   const gradual=alarm?alarm.gradual:true;
 const soundFiles={
-  rooster:'../sounds/Rooster.mp3',
-  bell:'../sounds/Bell.mp3',
-  beep:'../sounds/Beep.mp3',
-  chime:'../sounds/chime.mp3',
-  buzz:'../sounds/Buzz.mp3',
-  digital:'../sounds/Digital.mp3',
-  rain:'../sounds/Rain.mp3',
-  birds:'../sounds/bird.mp3',
-  ocean:'../sounds/Ocean.mp3'
-};
+        
+rooster:'../sounds/Rooster.mp3',
+bell:'../sounds/Bell.mp3',
+beep:'../sounds/Beep.mp3',
+chime:'../sounds/chime.mp3',
+buzz:'../sounds/Buzz.mp3',
+digital:'../sounds/Digital.mp3',
+rain:'../sounds/Rain.mp3',
+birds:'../sounds/bird.mp3',
+ocean:'../sounds/Ocean.mp3'
+  
+}
 if(soundFiles[sound]){
   const audio=document.createElement('audio');
   audio.src=soundFiles[sound];
