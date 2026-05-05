@@ -469,7 +469,37 @@ function startAlarmSound(alarm){
   const sound=alarm?alarm.sound:'rooster';
   const vol=alarm?((alarm.volume||80)/100)*0.5:0.4;
   const gradual=alarm?alarm.gradual:true;
-
+const soundFiles={
+  rooster:'../sounds/Rooster.mp3',
+  bell:'../sounds/Bell.mp3',
+  beep:'../sounds/Beep.mp3',
+  chime:'../sounds/chime.mp3',
+  buzz:'../sounds/Buzz.mp3',
+  digital:'../sounds/Digital.mp3',
+  rain:'../sounds/Rain.mp3',
+  birds:'../sounds/bird.mp3',
+  ocean:'../sounds/Ocean.mp3'
+};
+if(soundFiles[sound]){
+  const audio=document.createElement('audio');
+  audio.src=soundFiles[sound];
+  audio.loop=true;
+  audio.volume=gradual?0.1:Math.min(vol*2,1);
+  audio.id='builtinAlarmAudio';
+  document.body.appendChild(audio);
+  audio.play();
+  if(gradual){
+    let v=0.1;
+    const gi=setInterval(()=>{
+      const a=document.getElementById('builtinAlarmAudio');
+      if(!a)return clearInterval(gi);
+      v=Math.min(v+0.05,Math.min(vol*2,1));
+      a.volume=v;
+      if(v>=Math.min(vol*2,1))clearInterval(gi);
+    },3000);
+  }
+  return;
+}
   if(sound==='custom'&&customSoundURL){
     // Custom sound — use HTML audio
     const audio=document.createElement('audio');
