@@ -111,8 +111,8 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 .upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;text-align:center;transition:all 0.2s}
 .upload-btn:hover{border-color:var(--glow);color:var(--glow)}
 .custom-sound-name{font-size:0.65rem;color:var(--green);margin-top:6px;text-align:center}
-        </style>
-        </head>
+</style>
+</head>
 <body>
 <div class="ring-overlay" id="ringOverlay"></div>
 <div class="container">
@@ -309,8 +309,8 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
     <div class="sec-label">ABOUT</div>
     <div style="font-size:0.65rem;color:var(--dim);line-height:2">
       <div>App: <span style="color:var(--glow)">Neo Alarm Clock</span></div>
-      <div>Version: <span style="color:var(--glow)">3.0.0</span></div>
-      <div>Sounds: <span style="color:var(--glow)">9 Built-in + Custom</span></div>
+      <div>Version: <span style="color:var(--glow)">3.1.0</span></div>
+      <div>Sounds: <span style="color:var(--glow)">9 MP3 + Custom</span></div>
       <div>Features: <span style="color:var(--glow)">Timer · Stopwatch · World Clock · Themes</span></div>
     </div>
   </div>
@@ -319,17 +319,32 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 <div class="status-bar">
   <div><span class="status-dot"></span>ONLINE</div>
   <div id="alarmCount">0 ALARMS</div>
-  <div>v3.0.0</div>
+  <div>v3.1.0</div>
 </div>
-  </div>
-  <script>
+</div>
+<script>
 let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
 let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber"}');
 let selectedSound='rooster',customSoundURL=null,ringingId=null,snoozeCount=0;
 let timerInterval=null,timerRemaining=0,timerRunning=false;
 let swInterval=null,swRunning=false,swElapsed=0,swLapTime=0,laps=[];
-let alarmGainNode=null,alarmCtx=null,alarmNodes=[];
+let timerAudioCtx=null;
+
 const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
+
+// 🔊 MP3 Sound Files
+const soundFiles={
+  rooster:'../sounds/Rooster.mp3',
+  bell:'../sounds/Bell.mp3',
+  beep:'../sounds/Beep.mp3',
+  chime:'../sounds/chime.mp3',
+  buzz:'../sounds/Buzz.mp3',
+  digital:'../sounds/Digital.mp3',
+  rain:'../sounds/Rain.mp3',
+  birds:'../sounds/bird.mp3',
+  ocean:'../sounds/Ocean.mp3'
+};
+
 const worldCities=[
   {city:'INDIA',tz:'Asia/Kolkata',flag:'🇮🇳'},
   {city:'UK',tz:'Europe/London',flag:'🇬🇧'},
@@ -342,6 +357,7 @@ const worldCities=[
   {city:'FRANCE',tz:'Europe/Paris',flag:'🇫🇷'},
   {city:'CANADA W',tz:'America/Vancouver',flag:'🇨🇦'}
 ];
+
 const themes={
   cyber:{name:'Cyber',bg:'#060a0f',panel:'#0d1520',border:'#1a3a5c',glow:'#00d4ff',text:'#cde8ff',dim:'#3a6080'},
   dark:{name:'Dark',bg:'#0a0a0a',panel:'#141414',border:'#2a2a2a',glow:'#ffffff',text:'#e0e0e0',dim:'#555'},
@@ -351,7 +367,7 @@ const themes={
   light:{name:'Light',bg:'#f0f4f8',panel:'#ffffff',border:'#c0d0e0',glow:'#0066cc',text:'#1a2a3a',dim:'#7a9ab0'}
 };
 
-// ── Navigation ─────────────────────────────────────────
+// ── Navigation ──────────────────────────
 function showPage(p,btn){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
@@ -359,7 +375,7 @@ function showPage(p,btn){
   if(btn)btn.classList.add('active');
 }
 
-// ── Theme ──────────────────────────────────────────────
+// ── Theme ───────────────────────────────
 function applyTheme(key){
   const t=themes[key];if(!t)return;
   const r=document.documentElement.style;
@@ -380,7 +396,7 @@ function renderThemes(){
     </div>`).join('');
 }
 
-// ── Clock ──────────────────────────────────────────────
+// ── Clock ───────────────────────────────
 function updateClock(){
   const now=new Date();
   document.getElementById('clock').textContent=now.toLocaleTimeString('en-US',{timeZone:settings.homeTz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!settings.use24h});
@@ -407,7 +423,7 @@ function updateWorldClocks(now){
   }).join('');
 }
 
-// ── Alarm Check ────────────────────────────────────────
+// ── Alarm Check ─────────────────────────
 function checkAlarms(now){
   if(ringingId!==null)return;
   const h=String(now.getHours()).padStart(2,'0');
@@ -452,150 +468,68 @@ function snoozeCustom(){
   if(mins&&mins>0)snooze(mins);
 }
 
-// ── 🔊 VOLUME CONTROLLED ALARM SOUND ──────────────────
-// Volume slider directly controls Web Audio gain node
-// This means alarm volume is independent of media volume!
-
+// ── 🔊 ALARM SOUND — MP3 based ──────────
 function updateVolDisplay(val){
   document.getElementById('volVal').textContent=val+'%';
-  // Live update gain if alarm is ringing
-  if(alarmGainNode){
-    alarmGainNode.gain.value=(val/100)*0.5;
-  }
+  const a=document.getElementById('alarmAudioEl');
+  if(a)a.volume=val/100;
 }
 
 function startAlarmSound(alarm){
   stopAlarmSound();
   const sound=alarm?alarm.sound:'rooster';
-  const vol=alarm?((alarm.volume||80)/100)*0.5:0.4;
+  const vol=alarm?(alarm.volume||80)/100:0.8;
   const gradual=alarm?alarm.gradual:true;
-const soundFiles={
-        
-rooster:'../sounds/Rooster.mp3',
-bell:'../sounds/Bell.mp3',
-beep:'../sounds/Beep.mp3',
-chime:'../sounds/chime.mp3',
-buzz:'../sounds/Buzz.mp3',
-digital:'../sounds/Digital.mp3',
-rain:'../sounds/Rain.mp3',
-birds:'../sounds/bird.mp3',
-ocean:'../sounds/Ocean.mp3'
-  
-}
-if(soundFiles[sound]){
+
+  // Get src — custom or mp3 file
+  const src=sound==='custom'?customSoundURL:soundFiles[sound];
+  if(!src)return;
+
   const audio=document.createElement('audio');
-  audio.src=soundFiles[sound];
+  audio.src=src;
   audio.loop=true;
-  audio.volume=gradual?0.1:Math.min(vol*2,1);
-  audio.id='builtinAlarmAudio';
+  audio.id='alarmAudioEl';
+  audio.volume=gradual?0.05:vol;
   document.body.appendChild(audio);
-  audio.play();
+
+  audio.play().catch(e=>{
+    console.log('Audio play error:',e);
+    // Retry on user interaction
+    document.addEventListener('touchstart',()=>audio.play(),{once:true});
+    document.addEventListener('click',()=>audio.play(),{once:true});
+  });
+
   if(gradual){
-    let v=0.1;
+    let v=0.05;
     const gi=setInterval(()=>{
-      const a=document.getElementById('builtinAlarmAudio');
-      if(!a)return clearInterval(gi);
-      v=Math.min(v+0.05,Math.min(vol*2,1));
+      const a=document.getElementById('alarmAudioEl');
+      if(!a){clearInterval(gi);return;}
+      v=Math.min(v+0.05,vol);
       a.volume=v;
-      if(v>=Math.min(vol*2,1))clearInterval(gi);
+      if(v>=vol)clearInterval(gi);
     },3000);
   }
-  return;
-}
-  if(sound==='custom'&&customSoundURL){
-    // Custom sound — use HTML audio
-    const audio=document.createElement('audio');
-    audio.src=customSoundURL;
-    audio.loop=true;
-    audio.volume=gradual?0.1:vol*2;
-    audio.id='customAlarmAudio';
-    document.body.appendChild(audio);
-    audio.play();
-    if(gradual){
-      let v=0.1;
-      const gi=setInterval(()=>{
-        if(!document.getElementById('customAlarmAudio'))return clearInterval(gi);
-        v=Math.min(v+0.05,vol*2);
-        document.getElementById('customAlarmAudio').volume=v;
-        if(v>=vol*2)clearInterval(gi);
-      },3000);
-    }
-    return;
-  }
-
-  // Built-in sounds — Web Audio with gain control
-  alarmCtx=new(window.AudioContext||window.webkitAudioContext)();
-  alarmGainNode=alarmCtx.createGain();
-  alarmGainNode.connect(alarmCtx.destination);
-  alarmGainNode.gain.value=gradual?0.01:vol;
-
-  let currentVol=gradual?0.01:vol;
-  const dur={rooster:2400,bell:2000,beep:1800,chime:2200,buzz:1500,digital:1500,rain:3000,birds:2800,ocean:3000};
-
-  function loop(){
-    if(ringingId===null)return;
-    if(gradual&&currentVol<vol){currentVol=Math.min(currentVol+0.03,vol);alarmGainNode.gain.value=currentVol;}
-    playSoundOnce(sound,alarmCtx,alarmGainNode,1.0);
-    setTimeout(loop,dur[sound]||2000);
-  }
-  loop();
 }
 
 function stopAlarmSound(){
-  alarmNodes.forEach(n=>{try{n.stop();}catch(e){}});
-  alarmNodes=[];
-  if(alarmCtx){try{alarmCtx.close();}catch(e){}}
-  alarmCtx=null;alarmGainNode=null;
-  const ca=document.getElementById('customAlarmAudio');
-  if(ca){ca.pause();ca.remove();}
+  const a=document.getElementById('alarmAudioEl');
+  if(a){a.pause();a.src='';a.remove();}
 }
 
-function playSoundOnce(sound,ctx,gainNode,vol){
-  function nd(freq,t,dur,type,v,fe){
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(gainNode);o.type=type;
-    o.frequency.setValueAtTime(freq,ctx.currentTime+t);
-    if(fe)o.frequency.exponentialRampToValueAtTime(fe,ctx.currentTime+t+dur);
-    g.gain.setValueAtTime(0,ctx.currentTime+t);
-    g.gain.linearRampToValueAtTime(v,ctx.currentTime+t+0.02);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+dur);
-    o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+dur+0.05);
-    alarmNodes.push(o);
-  }
-  switch(sound){
-    case'rooster':
-      nd(400,0,.18,'sawtooth',.9,640);nd(600,0,.18,'triangle',.4,960);
-      nd(500,.22,.14,'sawtooth',.7,800);nd(350,.40,.30,'sawtooth',.8,560);
-      nd(550,.74,.12,'sawtooth',.6,880);nd(480,.90,.55,'sawtooth',1,432);break;
-    case'bell':
-      [0,.6,1.2].forEach(t=>{nd(880,t,.8,'sine',.75);nd(1100,t,.6,'sine',.38);});break;
-    case'beep':
-      [0,.4,.8,1.2].forEach(t=>nd(1000,t,.2,'square',.5));break;
-    case'chime':
-      [523,659,784,1047,784,659,523].forEach((f,i)=>nd(f,i*.22,.5,'sine',.63));break;
-    case'buzz':
-      [0,.3,.6].forEach(t=>{nd(150,t,.25,'sawtooth',1);nd(200,t,.25,'square',.5);});break;
-    case'digital':
-      [800,1200,600,1400,900,1100].forEach((f,i)=>nd(f,i*.13,.1,'square',.45));break;
-    case'rain':
-      for(let i=0;i<8;i++)nd(200+Math.random()*1800,Math.random()*2,.15,'sine',.3*Math.random());break;
-    case'birds':
-      [[800,1200],[1000,1500],[600,1000],[1200,1800]].forEach(([f1,f2],i)=>nd(f1,i*.4,.15,'sine',.5,f2));break;
-    case'ocean':
-      for(let i=0;i<6;i++)nd(60+i*10,i*.4,.35,'sine',.6,80+i*8);break;
-  }
-}
-
-// ── Sound Select & Preview ─────────────────────────────
+// ── Sound Preview ────────────────────────
 function selectSound(s,btn){
   selectedSound=s;
   document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('selected'));
   if(btn)btn.classList.add('selected');
+  // Preview sound
   if(s!=='custom'){
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const g=ctx.createGain();g.connect(ctx.destination);g.gain.value=0.3;
-    playSoundOnce(s,ctx,g,1);
-    setTimeout(()=>{try{ctx.close();}catch(e){}},3000);
+    const src=soundFiles[s];
+    if(src){
+      const prev=new Audio(src);
+      prev.volume=0.5;
+      prev.play().catch(e=>console.log(e));
+      setTimeout(()=>{prev.pause();prev.src='';},3000);
+    }
   }
 }
 
@@ -608,8 +542,7 @@ function handleCustomSound(input){
   setTimeout(()=>{a.pause();},3000);
 }
 
-// ── Timer ──────────────────────────────────────────────
-let timerAudioCtx=null;
+// ── Timer ────────────────────────────────
 function startTimer(){
   if(timerRunning)return;
   const h=+document.getElementById('timerH').value||0;
@@ -628,15 +561,15 @@ function startTimer(){
       clearInterval(timerInterval);timerRunning=false;
       document.getElementById('timerFinish').style.display='block';
       if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);
-      timerAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-      const tg=timerAudioCtx.createGain();tg.connect(timerAudioCtx.destination);tg.gain.value=0.3;
-      function tloop(){if(timerAudioCtx)playSoundOnce('bell',timerAudioCtx,tg,1);setTimeout(()=>{if(timerAudioCtx)tloop();},2000);}
-      tloop();
+      const ta=new Audio(soundFiles['bell']);
+      ta.loop=true;ta.volume=0.8;ta.id='timerAudioEl';
+      document.body.appendChild(ta);ta.play().catch(e=>console.log(e));
     }
   },1000);
 }
 
 function pauseTimer(){clearInterval(timerInterval);timerRunning=false;}
+
 function resetTimer(){
   clearInterval(timerInterval);timerRunning=false;timerRemaining=0;
   document.getElementById('timerDisplay').textContent='00:00:00';
@@ -645,12 +578,14 @@ function resetTimer(){
   document.getElementById('timerM').value='';
   document.getElementById('timerS').value='';
 }
+
 function stopTimerAlarm(){
-  if(timerAudioCtx){timerAudioCtx.close();timerAudioCtx=null;}
+  const ta=document.getElementById('timerAudioEl');
+  if(ta){ta.pause();ta.src='';ta.remove();}
   document.getElementById('timerFinish').style.display='none';
 }
 
-// ── Stopwatch ──────────────────────────────────────────
+// ── Stopwatch ────────────────────────────
 function startSW(){
   if(swRunning)return;swRunning=true;
   const start=Date.now()-swElapsed;
@@ -676,7 +611,7 @@ function resetSW(){
   document.getElementById('lapList').innerHTML='';
 }
 
-// ── CRUD ───────────────────────────────────────────────
+// ── CRUD ─────────────────────────────────
 function addAlarm(){
   const time=document.getElementById('alarmTime').value;
   if(!time){document.getElementById('alarmTime').style.borderColor='var(--red)';setTimeout(()=>document.getElementById('alarmTime').style.borderColor='',1000);return;}
