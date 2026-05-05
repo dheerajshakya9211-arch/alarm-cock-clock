@@ -17,8 +17,9 @@ jobs:
       - name: Copy icon
         run: |
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-          cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+          find . -name "*.png" | head -10
+          cp resources/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || cp *.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || echo "Icon skip"
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || echo "skip"
       - name: Sync
         run: npx cap sync android
       - uses: actions/setup-java@v4
@@ -31,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: neo-alarm-clock
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/src/main/res/mipmap-xxxhdpi/android/app/build/outputs/apk/debug/app-debug.apk
