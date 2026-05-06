@@ -20,7 +20,10 @@ jobs:
             mkdir -p "$dir"
             cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}/ic_launcher.png"
             cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}/ic_launcher_round.png"
+            cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}/ic_launcher_foreground.png"
           done
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           
       - name: Sync
         run: npx cap sync android
