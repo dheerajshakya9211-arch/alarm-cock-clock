@@ -16,10 +16,10 @@ jobs:
         run: npx cap add android
       - name: Copy icon
         run: |
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          find . -name "*.png" | head -10
-          cp resources/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || cp *.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || echo "Icon skip"
-          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || echo "skip"
+         mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          cp file_000000007f40*.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || echo "skip"
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || echo "skip" 
+    
       - name: Sync
         run: npx cap sync android
       - uses: actions/setup-java@v4
