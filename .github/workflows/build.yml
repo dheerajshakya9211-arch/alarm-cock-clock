@@ -17,9 +17,8 @@ jobs:
       - name: Copy icon
         run: |
          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          cp file_000000007f40*.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || echo "skip"
-          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || echo "skip" 
-    
+          cp file_000000007f4071f8bb91a33f1a32e5b2.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || echo "skip"
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || echo "skip"
       - name: Sync
         run: npx cap sync android
       - uses: actions/setup-java@v4
