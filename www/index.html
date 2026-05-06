@@ -587,7 +587,9 @@ function stopTimerAlarm(){
 
 // ── Stopwatch ────────────────────────────
 function startSW(){
-  if(swRunning)return;swRunning=true;
+  if(swRunning){clearInterval(swInterval);swRunning=false;document.querySelector('[onclick="startSW()"]').textContent='▶ START';return;}
+swRunning=true;
+document.querySelector('[onclick="startSW()"]').textContent='⏹ STOP';
   const start=Date.now()-swElapsed;
   swInterval=setInterval(()=>{
     swElapsed=Date.now()-start;
