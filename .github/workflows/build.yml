@@ -16,9 +16,10 @@ jobs:
         run: npx cap add android
       - name: Copy icon
         run: |
-          for dir in android/app/src/main/res/mipmap-*/; do
-            cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}ic_launcher.png" || echo "skip"
-            cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}ic_launcher_round.png" || echo "skip"
+          for dir in android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi; do
+            mkdir -p "$dir"
+            cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}/ic_launcher.png"
+            cp file_000000007f4071f8bb91a33f1a32e5b2.png "${dir}/ic_launcher_round.png"
           done
           
       - name: Sync
