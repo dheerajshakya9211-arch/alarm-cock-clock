@@ -101,6 +101,10 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 .theme-card{border:2px solid transparent;border-radius:6px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s}
 .theme-card.active{border-color:var(--glow);box-shadow:0 0 12px rgba(0,212,255,0.3)}
 .theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 6px}
+.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lang-card{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s;font-size:0.7rem;color:var(--dim)}
+.lang-card.active{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
+.lang-card:hover{border-color:var(--glow);color:var(--glow)}
 .status-bar{display:flex;justify-content:space-between;width:100%;font-size:0.55rem;color:var(--dim);letter-spacing:0.15em;padding:0 2px}
 .status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite;margin-right:5px}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -111,8 +115,8 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 .upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;text-align:center;transition:all 0.2s}
 .upload-btn:hover{border-color:var(--glow);color:var(--glow)}
 .custom-sound-name{font-size:0.65rem;color:var(--green);margin-top:6px;text-align:center}
-</style>
-</head>
+                  </style>
+                  </head>
 <body>
 <div class="ring-overlay" id="ringOverlay"></div>
 <div class="container">
@@ -132,17 +136,17 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
       <circle cx="15" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
       <circle cx="39" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
     </svg>
-    <h1>NEO ALARM CLOCK</h1>
+    <h1 id="appTitle">NEO ALARM CLOCK</h1>
   </div>
 </div>
 
 <div class="nav-tabs">
-  <button class="nav-tab active" onclick="showPage('clock',this)">🕐 CLOCK</button>
-  <button class="nav-tab" onclick="showPage('alarm',this)">⏰ ALARM</button>
-  <button class="nav-tab" onclick="showPage('timer',this)">⏱ TIMER</button>
-  <button class="nav-tab" onclick="showPage('stopwatch',this)">⏲ WATCH</button>
-  <button class="nav-tab" onclick="showPage('world',this)">🌍 WORLD</button>
-  <button class="nav-tab" onclick="showPage('settings',this)">⚙️ SET</button>
+  <button class="nav-tab active" onclick="showPage('clock',this)" id="nav-clock">🕐 CLOCK</button>
+  <button class="nav-tab" onclick="showPage('alarm',this)" id="nav-alarm">⏰ ALARM</button>
+  <button class="nav-tab" onclick="showPage('timer',this)" id="nav-timer">⏱ TIMER</button>
+  <button class="nav-tab" onclick="showPage('stopwatch',this)" id="nav-stopwatch">⏲ WATCH</button>
+  <button class="nav-tab" onclick="showPage('world',this)" id="nav-world">🌍 WORLD</button>
+  <button class="nav-tab" onclick="showPage('settings',this)" id="nav-settings">⚙️ SET</button>
 </div>
 
 <!-- CLOCK PAGE -->
@@ -152,28 +156,28 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
     <div id="date">LOADING...</div>
   </div>
   <div class="ringing-banner" id="ringingBanner">
-    <div class="ringing-title">⏰ ALARM RINGING!</div>
+    <div class="ringing-title" id="txt-wakeup">⏰ ALARM RINGING!</div>
     <div class="ringing-label" id="ringingLabel">ALARM</div>
     <div class="snooze-btns">
-      <button class="btn-snooze" onclick="snooze(5)">😴 5 MIN</button>
-      <button class="btn-snooze" onclick="snooze(10)">😴 10 MIN</button>
-      <button class="btn-snooze" onclick="snoozeCustom()">⏱ CUSTOM</button>
-      <button class="btn btn-danger" onclick="stopAlarm()">■ STOP</button>
+      <button class="btn-snooze" onclick="snooze(5)" id="txt-snooze5">😴 5 MIN</button>
+      <button class="btn-snooze" onclick="snooze(10)" id="txt-snooze10">😴 10 MIN</button>
+      <button class="btn-snooze" onclick="snoozeCustom()" id="txt-snoozeC">⏱ CUSTOM</button>
+      <button class="btn btn-danger" onclick="stopAlarm()" id="txt-stop">■ STOP</button>
     </div>
-    <div id="snoozeCount" style="font-size:0.6rem;color:var(--dim);margin-top:6px"></div>
+    <div id="snoozeCount"></div>
   </div>
 </div>
 
 <!-- ALARM PAGE -->
 <div class="page" id="page-alarm">
   <div class="panel">
-    <div class="sec-label">SET NEW ALARM</div>
+    <div class="sec-label" id="txt-setAlarm">SET NEW ALARM</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="row">
         <input type="time" id="alarmTime">
-        <input type="text" id="alarmLabel" placeholder="Label (optional)">
+        <input type="text" id="alarmLabel" placeholder="Label">
       </div>
-      <div class="sec-label">CHOOSE SOUND</div>
+      <div class="sec-label" id="txt-chooseSound">CHOOSE SOUND</div>
       <div class="sound-grid">
         <button class="sound-btn selected" data-sound="rooster" onclick="selectSound('rooster',this)">🐓 Rooster</button>
         <button class="sound-btn" data-sound="bell" onclick="selectSound('bell',this)">🔔 Bell</button>
@@ -184,27 +188,27 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
         <button class="sound-btn" data-sound="rain" onclick="selectSound('rain',this)">🌧 Rain</button>
         <button class="sound-btn" data-sound="birds" onclick="selectSound('birds',this)">🐦 Birds</button>
         <button class="sound-btn" data-sound="ocean" onclick="selectSound('ocean',this)">🌊 Ocean</button>
-        <button class="sound-btn" data-sound="custom" onclick="selectSound('custom',this)" id="customSoundBtn" style="grid-column:span 3">🎵 My Custom Sound</button>
+        <button class="sound-btn" data-sound="custom" onclick="selectSound('custom',this)" style="grid-column:span 3" id="txt-customSound">🎵 Custom Sound</button>
       </div>
-      <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()">
+      <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()" id="txt-uploadBtn">
         📁 Upload MP3 / WAV
         <input type="file" id="customSoundFile" accept="audio/*" style="display:none" onchange="handleCustomSound(this)">
       </div>
       <div class="custom-sound-name" id="customSoundName"></div>
       <div class="range-row">
-        <label>🔊 VOLUME</label>
+        <label id="txt-volume">🔊 VOLUME</label>
         <input type="range" id="alarmVol" min="0" max="100" value="80" oninput="updateVolDisplay(this.value)">
         <span class="range-val" id="volVal">80%</span>
       </div>
       <div class="toggle-row">
-        <div><label>📈 GRADUAL VOLUME</label><span>Slowly gets louder</span></div>
+        <div><label id="txt-gradual">📈 GRADUAL VOLUME</label><span id="txt-gradualDesc">Slowly gets louder</span></div>
         <label class="toggle"><input type="checkbox" id="gradualVol" checked><div class="toggle-track"></div></label>
       </div>
       <div class="toggle-row">
-        <div><label>📳 VIBRATION</label><span>Vibrate on alarm</span></div>
+        <div><label id="txt-vibration">📳 VIBRATION</label><span id="txt-vibrationDesc">Vibrate on alarm</span></div>
         <label class="toggle"><input type="checkbox" id="vibration" checked><div class="toggle-track"></div></label>
       </div>
-      <div class="sec-label">SNOOZE</div>
+      <div class="sec-label" id="txt-snoozeSet">SNOOZE</div>
       <div class="row">
         <select id="snoozeTime">
           <option value="5">5 min</option>
@@ -219,11 +223,11 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
           <option value="99">Unlimited</option>
         </select>
       </div>
-      <button class="btn btn-primary" onclick="addAlarm()" style="width:100%">+ SET ALARM</button>
+      <button class="btn btn-primary" onclick="addAlarm()" style="width:100%" id="txt-setBtn">+ SET ALARM</button>
     </div>
   </div>
   <div class="panel">
-    <div class="sec-label">MY ALARMS</div>
+    <div class="sec-label" id="txt-myAlarms">MY ALARMS</div>
     <div class="alarm-list" id="alarmList">
       <div class="no-alarms" id="noAlarms">[ NO ALARMS SET ]</div>
     </div>
@@ -233,7 +237,7 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 <!-- TIMER PAGE -->
 <div class="page" id="page-timer">
   <div class="panel">
-    <div class="sec-label">COUNTDOWN TIMER</div>
+    <div class="sec-label" id="txt-timer">COUNTDOWN TIMER</div>
     <div class="timer-display" id="timerDisplay">00:00:00</div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <input type="number" id="timerH" placeholder="HH" min="0" max="23" style="text-align:center">
@@ -241,13 +245,13 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
       <input type="number" id="timerS" placeholder="SS" min="0" max="59" style="text-align:center">
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-primary" onclick="startTimer()" style="flex:1">▶ START</button>
-      <button class="btn btn-secondary" onclick="pauseTimer()" style="flex:1">⏸ PAUSE</button>
-      <button class="btn btn-secondary" onclick="resetTimer()" style="flex:1">↺ RESET</button>
+      <button class="btn btn-primary" onclick="startTimer()" style="flex:1" id="txt-start">▶ START</button>
+      <button class="btn btn-secondary" onclick="pauseTimer()" style="flex:1" id="txt-pause">⏸ PAUSE</button>
+      <button class="btn btn-secondary" onclick="resetTimer()" style="flex:1" id="txt-reset">↺ RESET</button>
     </div>
     <div id="timerFinish" style="display:none;text-align:center;margin-top:12px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);animation:alarmFlash 0.5s infinite">⏰ TIME'S UP!</div>
-      <button class="btn btn-danger" onclick="stopTimerAlarm()" style="margin-top:8px">■ STOP</button>
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);animation:alarmFlash 0.5s infinite" id="txt-timesup">⏰ TIME'S UP!</div>
+      <button class="btn btn-danger" onclick="stopTimerAlarm()" style="margin-top:8px" id="txt-stopTimer">■ STOP</button>
     </div>
   </div>
 </div>
@@ -255,12 +259,12 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 <!-- STOPWATCH PAGE -->
 <div class="page" id="page-stopwatch">
   <div class="panel">
-    <div class="sec-label">STOPWATCH</div>
+    <div class="sec-label" id="txt-stopwatch">STOPWATCH</div>
     <div class="stopwatch-display" id="swDisplay">00:00:00.0</div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-primary" onclick="startSW()" style="flex:1">▶ START</button>
-      <button class="btn btn-secondary" onclick="lapSW()" style="flex:1">🏁 LAP</button>
-      <button class="btn btn-secondary" onclick="resetSW()" style="flex:1">↺ RESET</button>
+      <button class="btn btn-primary" onclick="startSW()" style="flex:1" id="swStartBtn">▶ START</button>
+      <button class="btn btn-secondary" onclick="lapSW()" style="flex:1" id="txt-lap">🏁 LAP</button>
+      <button class="btn btn-secondary" onclick="resetSW()" style="flex:1" id="txt-resetSW">↺ RESET</button>
     </div>
     <div class="lap-list" id="lapList"></div>
   </div>
@@ -269,7 +273,7 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 <!-- WORLD CLOCK -->
 <div class="page" id="page-world">
   <div class="panel">
-    <div class="sec-label">WORLD CLOCK</div>
+    <div class="sec-label" id="txt-worldClock">WORLD CLOCK</div>
     <div class="world-clocks" id="worldClocks"></div>
   </div>
 </div>
@@ -277,13 +281,17 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 <!-- SETTINGS PAGE -->
 <div class="page" id="page-settings">
   <div class="panel">
-    <div class="sec-label">THEME</div>
+    <div class="sec-label" id="txt-themeLabel">THEME</div>
     <div class="theme-grid" id="themeGrid"></div>
   </div>
   <div class="panel">
-    <div class="sec-label">APP SETTINGS</div>
+    <div class="sec-label" id="txt-langLabel">LANGUAGE</div>
+    <div class="lang-grid" id="langGrid"></div>
+  </div>
+  <div class="panel">
+    <div class="sec-label" id="txt-appSettings">APP SETTINGS</div>
     <div class="settings-row">
-      <label>🌍 HOME TIMEZONE</label>
+      <label id="txt-timezone">🌍 HOME TIMEZONE</label>
       <select id="homeTz" onchange="saveSettings()">
         <option value="Asia/Kolkata">🇮🇳 India (IST)</option>
         <option value="Europe/London">🇬🇧 UK (GMT/BST)</option>
@@ -298,41 +306,37 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
       </select>
     </div>
     <div class="settings-row toggle-row">
-      <div><label>🌙 24 HOUR FORMAT</label></div>
+      <div><label id="txt-24h">🌙 24 HOUR FORMAT</label></div>
       <label class="toggle"><input type="checkbox" id="use24h" onchange="saveSettings()"><div class="toggle-track"></div></label>
     </div>
     <div class="settings-row">
-      <label style="color:var(--red);cursor:pointer" onclick="clearAllAlarms()">🗑 CLEAR ALL ALARMS</label>
+      <label style="color:var(--red);cursor:pointer" onclick="clearAllAlarms()" id="txt-clearAll">🗑 CLEAR ALL ALARMS</label>
     </div>
   </div>
   <div class="panel">
     <div class="sec-label">ABOUT</div>
     <div style="font-size:0.65rem;color:var(--dim);line-height:2">
       <div>App: <span style="color:var(--glow)">Neo Alarm Clock</span></div>
-      <div>Version: <span style="color:var(--glow)">3.1.0</span></div>
+      <div>Version: <span style="color:var(--glow)">4.0.0</span></div>
       <div>Sounds: <span style="color:var(--glow)">9 MP3 + Custom</span></div>
-      <div>Features: <span style="color:var(--glow)">Timer · Stopwatch · World Clock · Themes</span></div>
+      <div><span id="txt-features" style="color:var(--glow)">Timer · Stopwatch · World Clock · Themes · Languages</span></div>
     </div>
   </div>
 </div>
 
 <div class="status-bar">
-  <div><span class="status-dot"></span>ONLINE</div>
+  <div><span class="status-dot"></span><span id="txt-online">ONLINE</span></div>
   <div id="alarmCount">0 ALARMS</div>
-  <div>v3.1.0</div>
+  <div>v4.0.0</div>
 </div>
 </div>
 <script>
 let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
-let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber"}');
+let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber","lang":"en"}');
 let selectedSound='rooster',customSoundURL=null,ringingId=null,snoozeCount=0;
 let timerInterval=null,timerRemaining=0,timerRunning=false;
 let swInterval=null,swRunning=false,swElapsed=0,swLapTime=0,laps=[];
-let timerAudioCtx=null;
 
-const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
-
-// 🔊 MP3 Sound Files
 const soundFiles={
   rooster:'sounds/Rooster.mp3',
   bell:'sounds/Bell.mp3',
@@ -344,6 +348,8 @@ const soundFiles={
   birds:'sounds/bird.mp3',
   ocean:'sounds/Ocean.mp3'
 };
+
+const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
 
 const worldCities=[
   {city:'INDIA',tz:'Asia/Kolkata',flag:'🇮🇳'},
@@ -366,6 +372,249 @@ const themes={
   sunset:{name:'Sunset',bg:'#0f0805',panel:'#1e100a',border:'#4a2010',glow:'#ff6b35',text:'#ffe0cc',dim:'#804020'},
   light:{name:'Light',bg:'#f0f4f8',panel:'#ffffff',border:'#c0d0e0',glow:'#0066cc',text:'#1a2a3a',dim:'#7a9ab0'}
 };
+
+// ── LANGUAGES ──────────────────────────────────────────
+const languages={
+  en:{name:'English',flag:'🇬🇧',
+    clock:'CLOCK',alarm:'ALARM',timer:'TIMER',watch:'WATCH',world:'WORLD',settings:'SETTINGS',
+    setAlarm:'SET NEW ALARM',chooseSound:'CHOOSE SOUND',volume:'🔊 VOLUME',
+    gradual:'📈 GRADUAL VOLUME',gradualDesc:'Slowly gets louder',
+    vibration:'📳 VIBRATION',vibrationDesc:'Vibrate on alarm',
+    snooze:'SNOOZE',setBtn:'+ SET ALARM',myAlarms:'MY ALARMS',
+    noAlarms:'[ NO ALARMS SET ]',wakeup:'⏰ ALARM RINGING!',
+    stop:'■ STOP',timerLabel:'COUNTDOWN TIMER',start:'▶ START',
+    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ TIME\'S UP!',
+    stopwatch:'STOPWATCH',lap:'🏁 LAP',worldClock:'WORLD CLOCK',
+    themeLabel:'THEME',langLabel:'LANGUAGE',appSettings:'APP SETTINGS',
+    timezone:'🌍 HOME TIMEZONE',format24:'🌙 24 HOUR FORMAT',
+    clearAll:'🗑 CLEAR ALL ALARMS',online:'ONLINE',customSound:'🎵 Custom Sound',
+    uploadBtn:'📁 Upload MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ CUSTOM'},
+
+  hi:{name:'हिंदी',flag:'🇮🇳',
+    clock:'घड़ी',alarm:'अलार्म',timer:'टाइमर',watch:'स्टॉपवॉच',world:'विश्व',settings:'सेटिंग',
+    setAlarm:'नया अलार्म सेट करें',chooseSound:'ध्वनि चुनें',volume:'🔊 आवाज़',
+    gradual:'📈 धीरे धीरे',gradualDesc:'धीरे-धीरे तेज होती है',
+    vibration:'📳 कंपन',vibrationDesc:'अलार्म पर कंपन',
+    snooze:'स्नूज़',setBtn:'+ अलार्म सेट करें',myAlarms:'मेरे अलार्म',
+    noAlarms:'[ कोई अलार्म नहीं ]',wakeup:'⏰ उठो! अलार्म बज रहा है!',
+    stop:'■ बंद करें',timerLabel:'काउंटडाउन टाइमर',start:'▶ शुरू',
+    pause:'⏸ रोकें',reset:'↺ रीसेट',timesup:'⏰ समय हो गया!',
+    stopwatch:'स्टॉपवॉच',lap:'🏁 लैप',worldClock:'विश्व घड़ी',
+    themeLabel:'थीम',langLabel:'भाषा',appSettings:'ऐप सेटिंग',
+    timezone:'🌍 समय क्षेत्र',format24:'🌙 24 घंटे',
+    clearAll:'🗑 सभी अलार्म हटाएं',online:'ऑनलाइन',customSound:'🎵 कस्टम ध्वनि',
+    uploadBtn:'📁 MP3 / WAV अपलोड करें',snooze5:'😴 5 मिनट',snooze10:'😴 10 मिनट',snoozeC:'⏱ कस्टम'},
+
+  ar:{name:'العربية',flag:'🇸🇦',
+    clock:'ساعة',alarm:'منبه',timer:'مؤقت',watch:'ساعة إيقاف',world:'العالم',settings:'إعدادات',
+    setAlarm:'ضبط منبه جديد',chooseSound:'اختر صوتاً',volume:'🔊 الصوت',
+    gradual:'📈 صوت تدريجي',gradualDesc:'يزداد تدريجياً',
+    vibration:'📳 اهتزاز',vibrationDesc:'اهتزاز عند المنبه',
+    snooze:'غفوة',setBtn:'+ ضبط منبه',myAlarms:'منبهاتي',
+    noAlarms:'[ لا توجد منبهات ]',wakeup:'⏰ المنبه يرن!',
+    stop:'■ إيقاف',timerLabel:'مؤقت العد التنازلي',start:'▶ ابدأ',
+    pause:'⏸ توقف',reset:'↺ إعادة',timesup:'⏰ انتهى الوقت!',
+    stopwatch:'ساعة إيقاف',lap:'🏁 لفة',worldClock:'ساعة العالم',
+    themeLabel:'المظهر',langLabel:'اللغة',appSettings:'إعدادات التطبيق',
+    timezone:'🌍 المنطقة الزمنية',format24:'🌙 24 ساعة',
+    clearAll:'🗑 مسح جميع المنبهات',online:'متصل',customSound:'🎵 صوت مخصص',
+    uploadBtn:'📁 رفع MP3 / WAV',snooze5:'😴 5 دقائق',snooze10:'😴 10 دقائق',snoozeC:'⏱ مخصص'},
+
+  fr:{name:'Français',flag:'🇫🇷',
+    clock:'HORLOGE',alarm:'ALARME',timer:'MINUTEUR',watch:'CHRONO',world:'MONDE',settings:'RÉGLAGES',
+    setAlarm:'NOUVELLE ALARME',chooseSound:'CHOISIR SON',volume:'🔊 VOLUME',
+    gradual:'📈 VOLUME PROGRESSIF',gradualDesc:'Monte progressivement',
+    vibration:'📳 VIBRATION',vibrationDesc:'Vibrer à l\'alarme',
+    snooze:'RAPPEL',setBtn:'+ RÉGLER ALARME',myAlarms:'MES ALARMES',
+    noAlarms:'[ AUCUNE ALARME ]',wakeup:'⏰ RÉVEIL!',
+    stop:'■ ARRÊT',timerLabel:'MINUTEUR',start:'▶ DÉBUT',
+    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ TEMPS ÉCOULÉ!',
+    stopwatch:'CHRONOMÈTRE',lap:'🏁 TOUR',worldClock:'HORLOGE MONDIALE',
+    themeLabel:'THÈME',langLabel:'LANGUE',appSettings:'PARAMÈTRES',
+    timezone:'🌍 FUSEAU HORAIRE',format24:'🌙 FORMAT 24H',
+    clearAll:'🗑 EFFACER ALARMES',online:'EN LIGNE',customSound:'🎵 Son Personnalisé',
+    uploadBtn:'📁 Importer MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONNALISÉ'},
+
+  es:{name:'Español',flag:'🇪🇸',
+    clock:'RELOJ',alarm:'ALARMA',timer:'TEMPORIZADOR',watch:'CRONÓMETRO',world:'MUNDO',settings:'AJUSTES',
+    setAlarm:'NUEVA ALARMA',chooseSound:'ELEGIR SONIDO',volume:'🔊 VOLUMEN',
+    gradual:'📈 VOLUMEN GRADUAL',gradualDesc:'Sube gradualmente',
+    vibration:'📳 VIBRACIÓN',vibrationDesc:'Vibrar en alarma',
+    snooze:'POSPONER',setBtn:'+ PONER ALARMA',myAlarms:'MIS ALARMAS',
+    noAlarms:'[ SIN ALARMAS ]',wakeup:'⏰ ¡ALARMA!',
+    stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIO',
+    pause:'⏸ PAUSA',reset:'↺ RESET',timesup:'⏰ ¡TIEMPO!',
+    stopwatch:'CRONÓMETRO',lap:'🏁 VUELTA',worldClock:'RELOJ MUNDIAL',
+    themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURACIÓN',
+    timezone:'🌍 ZONA HORARIA',format24:'🌙 FORMATO 24H',
+    clearAll:'🗑 BORRAR ALARMAS',online:'EN LÍNEA',customSound:'🎵 Sonido Personalizado',
+    uploadBtn:'📁 Subir MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
+
+  de:{name:'Deutsch',flag:'🇩🇪',
+    clock:'UHR',alarm:'ALARM',timer:'TIMER',watch:'STOPPUHR',world:'WELT',settings:'EINSTELLUNG',
+    setAlarm:'NEUER ALARM',chooseSound:'TON WÄHLEN',volume:'🔊 LAUTSTÄRKE',
+    gradual:'📈 SANFTER START',gradualDesc:'Wird langsam lauter',
+    vibration:'📳 VIBRATION',vibrationDesc:'Vibration bei Alarm',
+    snooze:'SCHLUMMER',setBtn:'+ ALARM STELLEN',myAlarms:'MEINE ALARME',
+    noAlarms:'[ KEINE ALARME ]',wakeup:'⏰ ALARM!',
+    stop:'■ STOP',timerLabel:'COUNTDOWN',start:'▶ START',
+    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ ZEIT IST UM!',
+    stopwatch:'STOPPUHR',lap:'🏁 RUNDE',worldClock:'WELTUHR',
+    themeLabel:'DESIGN',langLabel:'SPRACHE',appSettings:'EINSTELLUNGEN',
+    timezone:'🌍 ZEITZONE',format24:'🌙 24H FORMAT',
+    clearAll:'🗑 ALARME LÖSCHEN',online:'ONLINE',customSound:'🎵 Eigener Ton',
+    uploadBtn:'📁 MP3 / WAV Hochladen',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ BENUTZERDEFINIERT'},
+
+  ja:{name:'日本語',flag:'🇯🇵',
+    clock:'時計',alarm:'アラーム',timer:'タイマー',watch:'ストップウォッチ',world:'世界',settings:'設定',
+    setAlarm:'アラーム設定',chooseSound:'サウンド選択',volume:'🔊 音量',
+    gradual:'📈 徐々に大きく',gradualDesc:'徐々に音が大きくなります',
+    vibration:'📳 バイブレーション',vibrationDesc:'アラーム時に振動',
+    snooze:'スヌーズ',setBtn:'+ アラーム設定',myAlarms:'マイアラーム',
+    noAlarms:'[ アラームなし ]',wakeup:'⏰ アラーム！',
+    stop:'■ 停止',timerLabel:'カウントダウン',start:'▶ スタート',
+    pause:'⏸ 一時停止',reset:'↺ リセット',timesup:'⏰ 時間です！',
+    stopwatch:'ストップウォッチ',lap:'🏁 ラップ',worldClock:'世界時計',
+    themeLabel:'テーマ',langLabel:'言語',appSettings:'アプリ設定',
+    timezone:'🌍 タイムゾーン',format24:'🌙 24時間',
+    clearAll:'🗑 全削除',online:'オンライン',customSound:'🎵 カスタム音',
+    uploadBtn:'📁 MP3/WAV アップロード',snooze5:'😴 5分',snooze10:'😴 10分',snoozeC:'⏱ カスタム'},
+
+  zh:{name:'中文',flag:'🇨🇳',
+    clock:'时钟',alarm:'闹钟',timer:'计时器',watch:'秒表',world:'世界',settings:'设置',
+    setAlarm:'设置闹钟',chooseSound:'选择声音',volume:'🔊 音量',
+    gradual:'📈 渐强音量',gradualDesc:'声音逐渐增大',
+    vibration:'📳 振动',vibrationDesc:'闹钟时振动',
+    snooze:'贪睡',setBtn:'+ 设置闹钟',myAlarms:'我的闹钟',
+    noAlarms:'[ 没有闹钟 ]',wakeup:'⏰ 闹钟响了！',
+    stop:'■ 停止',timerLabel:'倒计时',start:'▶ 开始',
+    pause:'⏸ 暂停',reset:'↺ 重置',timesup:'⏰ 时间到！',
+    stopwatch:'秒表',lap:'🏁 圈',worldClock:'世界时钟',
+    themeLabel:'主题',langLabel:'语言',appSettings:'应用设置',
+    timezone:'🌍 时区',format24:'🌙 24小时制',
+    clearAll:'🗑 清除所有闹钟',online:'在线',customSound:'🎵 自定义声音',
+    uploadBtn:'📁 上传 MP3/WAV',snooze5:'😴 5分钟',snooze10:'😴 10分钟',snoozeC:'⏱ 自定义'},
+
+  pt:{name:'Português',flag:'🇧🇷',
+    clock:'RELÓGIO',alarm:'ALARME',timer:'TEMPORIZADOR',watch:'CRONÔMETRO',world:'MUNDO',settings:'CONFIGURAR',
+    setAlarm:'NOVO ALARME',chooseSound:'ESCOLHER SOM',volume:'🔊 VOLUME',
+    gradual:'📈 VOLUME GRADUAL',gradualDesc:'Aumenta gradualmente',
+    vibration:'📳 VIBRAÇÃO',vibrationDesc:'Vibrar no alarme',
+    snooze:'SONECA',setBtn:'+ DEFINIR ALARME',myAlarms:'MEUS ALARMES',
+    noAlarms:'[ SEM ALARMES ]',wakeup:'⏰ ALARME!',
+    stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIAR',
+    pause:'⏸ PAUSAR',reset:'↺ RESET',timesup:'⏰ TEMPO ESGOTADO!',
+    stopwatch:'CRONÔMETRO',lap:'🏁 VOLTA',worldClock:'RELÓGIO MUNDIAL',
+    themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURAÇÕES',
+    timezone:'🌍 FUSO HORÁRIO',format24:'🌙 FORMATO 24H',
+    clearAll:'🗑 APAGAR ALARMES',online:'ON-LINE',customSound:'🎵 Som Personalizado',
+    uploadBtn:'📁 Enviar MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
+
+  ru:{name:'Русский',flag:'🇷🇺',
+    clock:'ЧАСЫ',alarm:'БУДИЛЬНИК',timer:'ТАЙМЕР',watch:'СЕКУНДОМЕР',world:'МИР',settings:'НАСТРОЙКИ',
+    setAlarm:'НОВЫЙ БУДИЛЬНИК',chooseSound:'ВЫБОР ЗВУКА',volume:'🔊 ГРОМКОСТЬ',
+    gradual:'📈 НАРАСТАНИЕ',gradualDesc:'Постепенно громче',
+    vibration:'📳 ВИБРАЦИЯ',vibrationDesc:'Вибрация при будильнике',
+    snooze:'ДРЕМОТА',setBtn:'+ УСТАНОВИТЬ',myAlarms:'МОИ БУДИЛЬНИКИ',
+    noAlarms:'[ НЕТ БУДИЛЬНИКОВ ]',wakeup:'⏰ БУДИЛЬНИК!',
+    stop:'■ СТОП',timerLabel:'ОБРАТНЫЙ ОТСЧЁТ',start:'▶ СТАРТ',
+    pause:'⏸ ПАУЗА',reset:'↺ СБРОС',timesup:'⏰ ВРЕМЯ ВЫШЛО!',
+    stopwatch:'СЕКУНДОМЕР',lap:'🏁 КРУГ',worldClock:'МИРОВЫЕ ЧАСЫ',
+    themeLabel:'ТЕМА',langLabel:'ЯЗЫК',appSettings:'НАСТРОЙКИ',
+    timezone:'🌍 ЧАСОВОЙ ПОЯС',format24:'🌙 24 ЧАСА',
+    clearAll:'🗑 УДАЛИТЬ ВСЕ',online:'В СЕТИ',customSound:'🎵 Свой звук',
+    uploadBtn:'📁 Загрузить MP3/WAV',snooze5:'😴 5 МИН',snooze10:'😴 10 МИН',snoozeC:'⏱ ДРУГОЕ'},
+
+  ko:{name:'한국어',flag:'🇰🇷',
+    clock:'시계',alarm:'알람',timer:'타이머',watch:'스톱워치',world:'세계',settings:'설정',
+    setAlarm:'알람 설정',chooseSound:'소리 선택',volume:'🔊 볼륨',
+    gradual:'📈 점진적 볼륨',gradualDesc:'서서히 커집니다',
+    vibration:'📳 진동',vibrationDesc:'알람 시 진동',
+    snooze:'스누즈',setBtn:'+ 알람 설정',myAlarms:'내 알람',
+    noAlarms:'[ 알람 없음 ]',wakeup:'⏰ 알람!',
+    stop:'■ 정지',timerLabel:'카운트다운',start:'▶ 시작',
+    pause:'⏸ 일시정지',reset:'↺ 초기화',timesup:'⏰ 시간 종료!',
+    stopwatch:'스톱워치',lap:'🏁 랩',worldClock:'세계 시계',
+    themeLabel:'테마',langLabel:'언어',appSettings:'앱 설정',
+    timezone:'🌍 시간대',format24:'🌙 24시간',
+    clearAll:'🗑 모두 삭제',online:'온라인',customSound:'🎵 커스텀 사운드',
+    uploadBtn:'📁 MP3/WAV 업로드',snooze5:'😴 5분',snooze10:'😴 10분',snoozeC:'⏱ 직접입력'}
+};
+
+// ── Apply Language ──────────────────────
+function applyLang(key){
+  const l=languages[key];if(!l)return;
+  settings.lang=key;
+  localStorage.setItem('settings',JSON.stringify(settings));
+
+  // Nav tabs
+  document.getElementById('nav-clock').textContent='🕐 '+l.clock;
+  document.getElementById('nav-alarm').textContent='⏰ '+l.alarm;
+  document.getElementById('nav-timer').textContent='⏱ '+l.timer;
+  document.getElementById('nav-stopwatch').textContent='⏲ '+l.watch;
+  document.getElementById('nav-world').textContent='🌍 '+l.world;
+  document.getElementById('nav-settings').textContent='⚙️ '+l.settings;
+
+  // Alarm page
+  document.getElementById('txt-setAlarm').firstChild.textContent=l.setAlarm+' ';
+  document.getElementById('txt-chooseSound').firstChild.textContent=l.chooseSound+' ';
+  document.getElementById('txt-volume').textContent=l.volume;
+  document.getElementById('txt-gradual').textContent=l.gradual;
+  document.getElementById('txt-gradualDesc').textContent=l.gradualDesc;
+  document.getElementById('txt-vibration').textContent=l.vibration;
+  document.getElementById('txt-vibrationDesc').textContent=l.vibrationDesc;
+  document.getElementById('txt-snoozeSet').firstChild.textContent=l.snooze+' ';
+  document.getElementById('txt-setBtn').textContent=l.setBtn;
+  document.getElementById('txt-myAlarms').firstChild.textContent=l.myAlarms+' ';
+  document.getElementById('noAlarms').textContent=l.noAlarms;
+  document.getElementById('txt-customSound').textContent=l.customSound;
+  document.getElementById('txt-uploadBtn').childNodes[0].textContent=l.uploadBtn+' ';
+
+  // Ringing
+  document.getElementById('txt-wakeup').textContent=l.wakeup;
+  document.getElementById('txt-stop').textContent=l.stop;
+  document.getElementById('txt-snooze5').textContent=l.snooze5;
+  document.getElementById('txt-snooze10').textContent=l.snooze10;
+  document.getElementById('txt-snoozeC').textContent=l.snoozeC;
+
+  // Timer
+  document.getElementById('txt-timer').firstChild.textContent=l.timerLabel+' ';
+  document.getElementById('txt-start').textContent=l.start;
+  document.getElementById('txt-pause').textContent=l.pause;
+  document.getElementById('txt-reset').textContent=l.reset;
+  document.getElementById('txt-timesup').textContent=l.timesup;
+  document.getElementById('txt-stopTimer').textContent=l.stop;
+
+  // Stopwatch
+  document.getElementById('txt-stopwatch').firstChild.textContent=l.stopwatch+' ';
+  document.getElementById('swStartBtn').textContent=(swRunning?'⏹ ':' ▶ ')+l.start;
+  document.getElementById('txt-lap').textContent=l.lap;
+  document.getElementById('txt-resetSW').textContent=l.reset;
+
+  // World
+  document.getElementById('txt-worldClock').firstChild.textContent=l.worldClock+' ';
+
+  // Settings
+  document.getElementById('txt-themeLabel').firstChild.textContent=l.themeLabel+' ';
+  document.getElementById('txt-langLabel').firstChild.textContent=l.langLabel+' ';
+  document.getElementById('txt-appSettings').firstChild.textContent=l.appSettings+' ';
+  document.getElementById('txt-timezone').textContent=l.timezone;
+  document.getElementById('txt-24h').textContent=l.format24;
+  document.getElementById('txt-clearAll').textContent=l.clearAll;
+  document.getElementById('txt-online').textContent=l.online;
+
+  // Lang grid highlight
+  document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.lang===key));
+}
+
+function renderLangs(){
+  const grid=document.getElementById('langGrid');
+  grid.innerHTML=Object.entries(languages).map(([k,l])=>`
+    <div class="lang-card${settings.lang===k?' active':''}" data-lang="${k}" onclick="applyLang('${k}')">
+      <div style="font-size:1.2rem">${l.flag}</div>
+      <div>${l.name}</div>
+    </div>`).join('');
+}
 
 // ── Navigation ──────────────────────────
 function showPage(p,btn){
@@ -423,7 +672,7 @@ function updateWorldClocks(now){
   }).join('');
 }
 
-// ── Alarm Check ─────────────────────────
+// ── Alarm ───────────────────────────────
 function checkAlarms(now){
   if(ringingId!==null)return;
   const h=String(now.getHours()).padStart(2,'0');
@@ -439,10 +688,9 @@ function triggerAlarm(id){
   document.getElementById('ringOverlay').classList.add('show');
   document.getElementById('ringingBanner').classList.add('show');
   document.getElementById('ringingLabel').textContent=alarm?alarm.label:'ALARM';
-  document.getElementById('snoozeCount').textContent='Snooze left: '+(alarm?alarm.snoozeLimit||3:3)+'x';
+  document.getElementById('snoozeCount').textContent='Snooze: '+(alarm?alarm.snoozeLimit||3:3)+'x';
   if(alarm&&alarm.vibration&&navigator.vibrate)navigator.vibrate([500,200,500,200,500]);
-  startAlarmSound(alarm);
-  renderAlarms();
+  startAlarmSound(alarm);renderAlarms();
 }
 
 function stopAlarm(){
@@ -454,230 +702,4 @@ function stopAlarm(){
 }
 
 function snooze(mins){
-  const alarm=alarms.find(a=>a.id===ringingId);
-  if(!alarm)return;
-  if(snoozeCount>=(alarm.snoozeLimit||3)){alert('Snooze limit reached!');return;}
-  snoozeCount++;
-  const sid=ringingId;
-  stopAlarm();
-  setTimeout(()=>triggerAlarm(sid),mins*60000);
-}
-
-function snoozeCustom(){
-  const mins=parseInt(prompt('Kitne minute?','5'));
-  if(mins&&mins>0)snooze(mins);
-}
-
-// ── 🔊 ALARM SOUND — MP3 based ──────────
-function updateVolDisplay(val){
-  document.getElementById('volVal').textContent=val+'%';
-  const a=document.getElementById('alarmAudioEl');
-  if(a)a.volume=val/100;
-}
-
-function startAlarmSound(alarm){
-  stopAlarmSound();
-  const sound=alarm?alarm.sound:'rooster';
-  const vol=alarm?(alarm.volume||80)/100:0.8;
-  const gradual=alarm?alarm.gradual:true;
-
-  // Get src — custom or mp3 file
-  const src=sound==='custom'?customSoundURL:soundFiles[sound];
-  if(!src)return;
-
-  const audio=document.createElement('audio');
-  audio.src=src;
-  audio.loop=true;
-  audio.id='alarmAudioEl';
-  audio.volume=gradual?0.05:vol;
-  document.body.appendChild(audio);
-
-  audio.play().catch(e=>{
-    console.log('Audio play error:',e);
-    // Retry on user interaction
-    document.addEventListener('touchstart',()=>audio.play(),{once:true});
-    document.addEventListener('click',()=>audio.play(),{once:true});
-  });
-
-  if(gradual){
-    let v=0.05;
-    const gi=setInterval(()=>{
-      const a=document.getElementById('alarmAudioEl');
-      if(!a){clearInterval(gi);return;}
-      v=Math.min(v+0.05,vol);
-      a.volume=v;
-      if(v>=vol)clearInterval(gi);
-    },3000);
-  }
-}
-
-function stopAlarmSound(){
-  const a=document.getElementById('alarmAudioEl');
-  if(a){a.pause();a.src='';a.remove();}
-}
-
-// ── Sound Preview ────────────────────────
-function selectSound(s,btn){
-  selectedSound=s;
-  document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('selected'));
-  if(btn)btn.classList.add('selected');
-  // Preview sound
-  if(s!=='custom'){
-    const src=soundFiles[s];
-    if(src){
-      const prev=new Audio(src);
-      prev.volume=0.5;
-      prev.play().catch(e=>console.log(e));
-      setTimeout(()=>{prev.pause();prev.src='';},3000);
-    }
-  }
-}
-
-function handleCustomSound(input){
-  const file=input.files[0];if(!file)return;
-  customSoundURL=URL.createObjectURL(file);
-  document.getElementById('customSoundName').textContent='✅ '+file.name;
-  selectSound('custom',document.querySelector('[data-sound="custom"]'));
-  const a=new Audio(customSoundURL);a.volume=0.5;a.play();
-  setTimeout(()=>{a.pause();},3000);
-}
-
-// ── Timer ────────────────────────────────
-function startTimer(){
-  if(timerRunning)return;
-  const h=+document.getElementById('timerH').value||0;
-  const m=+document.getElementById('timerM').value||0;
-  const s=+document.getElementById('timerS').value||0;
-  if(!timerRemaining)timerRemaining=h*3600+m*60+s;
-  if(!timerRemaining)return;
-  timerRunning=true;
-  timerInterval=setInterval(()=>{
-    timerRemaining--;
-    const h2=Math.floor(timerRemaining/3600);
-    const m2=Math.floor((timerRemaining%3600)/60);
-    const s2=timerRemaining%60;
-    document.getElementById('timerDisplay').textContent=String(h2).padStart(2,'0')+':'+String(m2).padStart(2,'0')+':'+String(s2).padStart(2,'0');
-    if(timerRemaining<=0){
-      clearInterval(timerInterval);timerRunning=false;
-      document.getElementById('timerFinish').style.display='block';
-      if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);
-      const ta=new Audio(soundFiles['bell']);
-      ta.loop=true;ta.volume=0.8;ta.id='timerAudioEl';
-      document.body.appendChild(ta);ta.play().catch(e=>console.log(e));
-    }
-  },1000);
-}
-
-function pauseTimer(){clearInterval(timerInterval);timerRunning=false;}
-
-function resetTimer(){
-  clearInterval(timerInterval);timerRunning=false;timerRemaining=0;
-  document.getElementById('timerDisplay').textContent='00:00:00';
-  document.getElementById('timerFinish').style.display='none';
-  document.getElementById('timerH').value='';
-  document.getElementById('timerM').value='';
-  document.getElementById('timerS').value='';
-}
-
-function stopTimerAlarm(){
-  const ta=document.getElementById('timerAudioEl');
-  if(ta){ta.pause();ta.src='';ta.remove();}
-  document.getElementById('timerFinish').style.display='none';
-}
-
-// ── Stopwatch ────────────────────────────
-function startSW(){
-  if(swRunning){clearInterval(swInterval);swRunning=false;document.querySelector('[onclick="startSW()"]').textContent='▶ START';return;}
-swRunning=true;
-document.querySelector('[onclick="startSW()"]').textContent='⏹ STOP';
-  const start=Date.now()-swElapsed;
-  swInterval=setInterval(()=>{
-    swElapsed=Date.now()-start;
-    const ms=swElapsed%1000,s=Math.floor(swElapsed/1000)%60,m=Math.floor(swElapsed/60000)%60,h=Math.floor(swElapsed/3600000);
-    document.getElementById('swDisplay').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+Math.floor(ms/100);
-  },100);
-}
-
-function lapSW(){
-  if(!swRunning)return;
-  const split=swElapsed-swLapTime;swLapTime=swElapsed;laps.push(split);
-  const fmt=ms=>{const s=Math.floor(ms/1000)%60,m=Math.floor(ms/60000)%60,h=Math.floor(ms/3600000);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
-  const div=document.createElement('div');div.className='lap-item';
-  div.innerHTML='<span class="lap-num">LAP '+laps.length+'</span><span class="lap-split">+'+fmt(split)+'</span><span class="lap-time">'+fmt(swElapsed)+'</span>';
-  document.getElementById('lapList').insertBefore(div,document.getElementById('lapList').firstChild);
-}
-
-function resetSW(){
-  clearInterval(swInterval);swRunning=false;swElapsed=0;swLapTime=0;laps=[];
-  document.getElementById('swDisplay').textContent='00:00:00.0';
-  document.getElementById('lapList').innerHTML='';
-}
-
-// ── CRUD ─────────────────────────────────
-function addAlarm(){
-  const time=document.getElementById('alarmTime').value;
-  if(!time){document.getElementById('alarmTime').style.borderColor='var(--red)';setTimeout(()=>document.getElementById('alarmTime').style.borderColor='',1000);return;}
-  alarms.push({
-    id:Date.now(),time,
-    label:document.getElementById('alarmLabel').value.trim()||'ALARM',
-    sound:selectedSound,
-    volume:parseInt(document.getElementById('alarmVol').value),
-    gradual:document.getElementById('gradualVol').checked,
-    vibration:document.getElementById('vibration').checked,
-    snoozeTime:parseInt(document.getElementById('snoozeTime').value),
-    snoozeLimit:parseInt(document.getElementById('snoozeLimit').value),
-    enabled:true
-  });
-  save();renderAlarms();
-  document.getElementById('alarmLabel').value='';
-  document.getElementById('alarmTime').value='';
-}
-
-function toggleAlarm(id){alarms=alarms.map(a=>a.id===id?{...a,enabled:!a.enabled}:a);save();renderAlarms();}
-function deleteAlarm(id){alarms=alarms.filter(a=>a.id!==id);if(ringingId===id)stopAlarm();save();renderAlarms();}
-function clearAllAlarms(){if(confirm('Sab alarms delete karna hai?')){alarms=[];save();renderAlarms();}}
-function save(){localStorage.setItem('alarms',JSON.stringify(alarms));}
-function saveSettings(){
-  settings.homeTz=document.getElementById('homeTz').value;
-  settings.use24h=document.getElementById('use24h').checked;
-  localStorage.setItem('settings',JSON.stringify(settings));
-}
-
-function renderAlarms(){
-  const list=document.getElementById('alarmList');
-  const enabled=alarms.filter(a=>a.enabled).length;
-  document.getElementById('alarmCount').textContent=enabled+' ALARM'+(enabled!==1?'S':'');
-  document.getElementById('noAlarms').style.display=alarms.length===0?'block':'none';
-  list.querySelectorAll('.alarm-item').forEach(e=>e.remove());
-  alarms.slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(alarm=>{
-    const div=document.createElement('div');
-    div.className='alarm-item'+(ringingId===alarm.id?' ringing':'');
-    div.innerHTML=`
-      <div class="alarm-top">
-        <span class="alarm-time-txt">${alarm.time}</span>
-        <div class="alarm-actions">
-          <label class="toggle"><input type="checkbox"${alarm.enabled?' checked':''} onchange="toggleAlarm(${alarm.id})"><div class="toggle-track"></div></label>
-          <button class="btn-del" onclick="deleteAlarm(${alarm.id})">✕</button>
-        </div>
-      </div>
-      <div class="alarm-bottom">
-        <span class="badge badge-label">${alarm.label}</span>
-        <span class="badge badge-sound">${soundNames[alarm.sound]||alarm.sound}</span>
-        <span class="badge badge-info">😴${alarm.snoozeLimit}x</span>
-        ${alarm.gradual?'<span class="badge badge-info">📈</span>':''}
-        ${alarm.vibration?'<span class="badge badge-info">📳</span>':''}
-      </div>`;
-    list.appendChild(div);
-  });
-}
-
-function loadSettings(){
-  document.getElementById('homeTz').value=settings.homeTz||'Asia/Kolkata';
-  document.getElementById('use24h').checked=settings.use24h||false;
-  applyTheme(settings.theme||'cyber');
-}
-
-loadSettings();renderThemes();renderAlarms();updateClock();setInterval(updateClock,1000);
-</script>
-</body>
-</html>
+  const alarm=ala
