@@ -1,705 +1,2827 @@
+<!-- =========================
+PART 1 — HTML STRUCTURE
+Neo Alarm Clock v5
+========================= -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Neo Alarm Clock</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<script src="capacitor.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#060a0f;--panel:#0d1520;--border:#1a3a5c;--glow:#00d4ff;--glow2:#ff6b35;--red:#ff3b3b;--green:#00ff9d;--text:#cde8ff;--dim:#3a6080}
-body{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;font-family:'Share Tech Mono',monospace;color:var(--text);overflow-x:hidden;padding:12px}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.container{display:flex;flex-direction:column;align-items:center;gap:14px;z-index:10;width:100%;max-width:520px}
-.brand{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
-.brand-row{display:flex;align-items:center;gap:12px}
-.brand h1{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,5vw,1.6rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow);animation:titlePulse 3s ease-in-out infinite}
-@keyframes titlePulse{0%,100%{text-shadow:0 0 20px var(--glow)}50%{text-shadow:0 0 40px var(--glow)}}
-.logo-clock{width:48px;height:48px;filter:drop-shadow(0 0 10px rgba(0,212,255,0.7));flex-shrink:0}
-#logo-hour-hand,#logo-minute-hand,#logo-second-hand{transform-origin:27px 27px}
-.nav-tabs{display:flex;gap:4px;width:100%;flex-wrap:wrap}
-.nav-tab{flex:1;min-width:60px;font-family:'Orbitron',sans-serif;font-size:0.5rem;letter-spacing:0.1em;padding:7px 2px;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.2s}
-.nav-tab.active{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
-.page{display:none;width:100%;flex-direction:column;gap:12px}
-.page.active{display:flex}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;width:100%;position:relative;box-shadow:0 0 10px rgba(0,0,0,0.4)}
-.panel::before{content:'';position:absolute;top:6px;left:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-right:none;border-bottom:none}
-.panel::after{content:'';position:absolute;bottom:6px;right:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-left:none;border-top:none}
-.sec-label{font-size:0.55rem;letter-spacing:0.4em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
-#clock{font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,12vw,5rem);font-weight:700;color:var(--glow);text-shadow:0 0 30px var(--glow);letter-spacing:0.05em;line-height:1;text-align:center}
-#clock.alarm-on{animation:alarmFlash 0.5s ease-in-out infinite}
-@keyframes alarmFlash{0%,100%{color:var(--glow)}50%{color:var(--red);text-shadow:0 0 40px var(--red)}}
-#date{margin-top:6px;font-size:0.65rem;color:var(--dim);letter-spacing:0.2em;text-align:center}
-.world-clocks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.world-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:8px 10px}
-.world-city{font-size:0.6rem;color:var(--dim);letter-spacing:0.2em;margin-bottom:2px}
-.world-time{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--glow)}
-.world-date{font-size:0.55rem;color:var(--dim)}
-input[type=time],input[type=text],input[type=number],select{background:#070f1a;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:9px 10px;border-radius:3px;outline:none;width:100%;transition:border-color 0.2s}
-input[type=time]{color:var(--glow);font-family:'Orbitron',sans-serif;font-size:1rem}
-input:focus,select:focus{border-color:var(--glow)}
-select option{background:#0d1520}
-.row{display:flex;gap:8px}
-.row>*{flex:1}
-.sound-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-.sound-btn{background:#070f1a;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:7px 4px;border-radius:3px;cursor:pointer;text-align:center;transition:all 0.2s}
-.sound-btn.selected{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
-.sound-btn:hover{border-color:var(--glow);color:var(--glow)}
-.range-row{display:flex;align-items:center;gap:10px;margin:6px 0}
-.range-row label{font-size:0.6rem;color:var(--dim);width:80px;flex-shrink:0}
-input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
-.range-val{font-size:0.7rem;color:var(--glow);width:36px;text-align:right}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
-.toggle-row:last-child{border-bottom:none}
-.toggle-row label{font-size:0.68rem;color:var(--text)}
-.toggle-row span{font-size:0.58rem;color:var(--dim);display:block}
-.toggle{position:relative;width:40px;height:20px;flex-shrink:0}
-.toggle input{display:none}
-.toggle-track{position:absolute;inset:0;background:#0a1825;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s}
-.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--dim);border-radius:50%;transition:all 0.3s}
-.toggle input:checked+.toggle-track{background:rgba(0,212,255,0.15);border-color:var(--glow)}
-.toggle input:checked+.toggle-track::after{transform:translateX(20px);background:var(--glow);box-shadow:0 0 8px var(--glow)}
-.btn{font-family:'Orbitron',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.12em;padding:11px 14px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all 0.2s}
-.btn-primary{background:var(--glow);color:#000;box-shadow:0 0 16px rgba(0,212,255,0.3)}
-.btn-secondary{background:transparent;border:1px solid var(--glow);color:var(--glow)}
-.btn-danger{background:var(--red);color:#fff;animation:btnPulse 0.5s ease-in-out infinite}
-@keyframes btnPulse{0%,100%{box-shadow:0 0 16px rgba(255,59,59,0.4)}50%{box-shadow:0 0 32px rgba(255,59,59,0.8)}}
-.btn-snooze{background:rgba(255,107,53,0.2);color:var(--glow2);border:1px solid var(--glow2);font-family:'Orbitron',sans-serif;font-size:0.58rem;padding:8px 10px;border-radius:3px;cursor:pointer;white-space:nowrap}
-.alarm-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;margin-top:10px}
-.alarm-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px 12px}
-.alarm-item.ringing{border-color:var(--red);animation:itemFlash 0.5s ease-in-out infinite}
-@keyframes itemFlash{0%,100%{background:rgba(255,59,59,0.06)}50%{background:rgba(255,59,59,0.18)}}
-.alarm-top{display:flex;align-items:center;justify-content:space-between}
-.alarm-time-txt{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--glow)}
-.alarm-item.ringing .alarm-time-txt{color:var(--red)}
-.alarm-actions{display:flex;align-items:center;gap:8px}
-.alarm-bottom{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
-.badge{font-size:0.55rem;padding:2px 7px;border-radius:2px;border:1px solid}
-.badge-label{color:var(--dim);border-color:var(--border)}
-.badge-sound{color:var(--glow2);border-color:rgba(255,107,53,0.3)}
-.badge-info{color:var(--green);border-color:rgba(0,255,157,0.3)}
-.btn-del{background:transparent;border:1px solid #2a1a1a;color:#553333;font-size:0.8rem;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.btn-del:hover{border-color:var(--red);color:var(--red)}
-.no-alarms{text-align:center;color:var(--dim);font-size:0.65rem;padding:20px}
-.ring-overlay{display:none;position:fixed;inset:0;z-index:200;pointer-events:none}
-.ring-overlay.show{display:block;animation:ringOverlay 0.5s ease-in-out infinite}
-@keyframes ringOverlay{0%,100%{background:rgba(255,59,59,0.03)}50%{background:rgba(255,59,59,0.12)}}
-.ringing-banner{display:none;background:rgba(255,59,59,0.12);border:1px solid var(--red);border-radius:4px;padding:14px;text-align:center;width:100%}
-.ringing-banner.show{display:block}
-.ringing-title{font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);margin-bottom:4px;animation:alarmFlash 0.5s ease-in-out infinite}
-.ringing-label{font-size:0.7rem;color:var(--dim);margin-bottom:10px}
-.snooze-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.stopwatch-display,.timer-display{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,10vw,3.5rem);font-weight:700;color:var(--glow);text-align:center;text-shadow:0 0 20px var(--glow);letter-spacing:0.05em}
-.lap-list{max-height:160px;overflow-y:auto;margin-top:10px;display:flex;flex-direction:column;gap:4px}
-.lap-item{display:flex;justify-content:space-between;font-size:0.65rem;padding:5px 8px;background:#070f1a;border:1px solid var(--border);border-radius:3px}
-.lap-num{color:var(--dim)}
-.lap-time{color:var(--glow);font-family:'Orbitron',sans-serif}
-.lap-split{color:var(--glow2)}
-.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.theme-card{border:2px solid transparent;border-radius:6px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s}
-.theme-card.active{border-color:var(--glow);box-shadow:0 0 12px rgba(0,212,255,0.3)}
-.theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 6px}
-.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.lang-card{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s;font-size:0.7rem;color:var(--dim)}
-.lang-card.active{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
-.lang-card:hover{border-color:var(--glow);color:var(--glow)}
-.status-bar{display:flex;justify-content:space-between;width:100%;font-size:0.55rem;color:var(--dim);letter-spacing:0.15em;padding:0 2px}
-.status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite;margin-right:5px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.settings-row{padding:10px 0;border-bottom:1px solid var(--border)}
-.settings-row:last-child{border-bottom:none}
-.settings-row>label{font-size:0.65rem;color:var(--text);display:block;margin-bottom:6px}
-.settings-row span{font-size:0.58rem;color:var(--dim)}
-.upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;text-align:center;transition:all 0.2s}
-.upload-btn:hover{border-color:var(--glow);color:var(--glow)}
-.custom-sound-name{font-size:0.65rem;color:var(--green);margin-top:6px;text-align:center}
-                  </style>
-                  </head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+
+  <title>Neo Alarm Clock</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <!-- PART 2 CSS FILE -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
+
+<!-- ================= OVERLAY ================= -->
+
 <div class="ring-overlay" id="ringOverlay"></div>
-<div class="container">
-<div class="brand">
-  <div class="brand-row">
-    <svg class="logo-clock" viewBox="0 0 54 54" fill="none">
-      <circle cx="27" cy="27" r="25" stroke="#00d4ff" stroke-width="2" fill="#060a0f"/>
-      <circle cx="27" cy="27" r="21" stroke="#1a3a5c" stroke-width="0.8" fill="none"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(0 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(90 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(180 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(270 27 27)"/>
-      <line id="logo-hour-hand" x1="27" y1="27" x2="27" y2="14" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="logo-minute-hand" x1="27" y1="27" x2="27" y2="10" stroke="#cde8ff" stroke-width="1.5" stroke-linecap="round"/>
-      <line id="logo-second-hand" x1="27" y1="30" x2="27" y2="9" stroke="#ff3b3b" stroke-width="1" stroke-linecap="round"/>
-      <circle cx="27" cy="27" r="2.5" fill="#00d4ff"/>
-      <circle cx="15" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
-      <circle cx="39" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
-    </svg>
-    <h1 id="appTitle">NEO ALARM CLOCK</h1>
-  </div>
-</div>
 
-<div class="nav-tabs">
-  <button class="nav-tab active" onclick="showPage('clock',this)" id="nav-clock">🕐 CLOCK</button>
-  <button class="nav-tab" onclick="showPage('alarm',this)" id="nav-alarm">⏰ ALARM</button>
-  <button class="nav-tab" onclick="showPage('timer',this)" id="nav-timer">⏱ TIMER</button>
-  <button class="nav-tab" onclick="showPage('stopwatch',this)" id="nav-stopwatch">⏲ WATCH</button>
-  <button class="nav-tab" onclick="showPage('world',this)" id="nav-world">🌍 WORLD</button>
-  <button class="nav-tab" onclick="showPage('settings',this)" id="nav-settings">⚙️ SET</button>
-</div>
+<!-- ================= APP ================= -->
 
-<!-- CLOCK PAGE -->
-<div class="page active" id="page-clock">
-  <div class="panel">
-    <div id="clock">00:00:00</div>
-    <div id="date">LOADING...</div>
-  </div>
-  <div class="ringing-banner" id="ringingBanner">
-    <div class="ringing-title" id="txt-wakeup">⏰ ALARM RINGING!</div>
-    <div class="ringing-label" id="ringingLabel">ALARM</div>
-    <div class="snooze-btns">
-      <button class="btn-snooze" onclick="snooze(5)" id="txt-snooze5">😴 5 MIN</button>
-      <button class="btn-snooze" onclick="snooze(10)" id="txt-snooze10">😴 10 MIN</button>
-      <button class="btn-snooze" onclick="snoozeCustom()" id="txt-snoozeC">⏱ CUSTOM</button>
-      <button class="btn btn-danger" onclick="stopAlarm()" id="txt-stop">■ STOP</button>
-    </div>
-    <div id="snoozeCount"></div>
-  </div>
-</div>
+<div class="app">
 
-<!-- ALARM PAGE -->
-<div class="page" id="page-alarm">
-  <div class="panel">
-    <div class="sec-label" id="txt-setAlarm">SET NEW ALARM</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="row">
-        <input type="time" id="alarmTime">
-        <input type="text" id="alarmLabel" placeholder="Label">
+  <!-- ================= HEADER ================= -->
+
+  <header class="topbar">
+
+    <div class="logo-box">
+
+      <svg class="logo-clock"
+           viewBox="0 0 100 100">
+
+        <circle cx="50"
+                cy="50"
+                r="45"
+                class="clock-ring"/>
+
+        <circle cx="50"
+                cy="50"
+                r="4"
+                class="clock-center"/>
+
+        <!-- Hour -->
+        <line id="logoHour"
+              x1="50"
+              y1="50"
+              x2="50"
+              y2="30"
+              class="hour-hand"/>
+
+        <!-- Minute -->
+        <line id="logoMinute"
+              x1="50"
+              y1="50"
+              x2="50"
+              y2="20"
+              class="minute-hand"/>
+
+        <!-- Second -->
+        <line id="logoSecond"
+              x1="50"
+              y1="55"
+              x2="50"
+              y2="16"
+              class="second-hand"/>
+
+      </svg>
+
+      <div>
+        <h1 class="app-title">
+          NEO ALARM CLOCK
+        </h1>
+
+        <p class="app-sub">
+          Cyberpunk Smart Clock
+        </p>
       </div>
-      <div class="sec-label" id="txt-chooseSound">CHOOSE SOUND</div>
-      <div class="sound-grid">
-        <button class="sound-btn selected" data-sound="rooster" onclick="selectSound('rooster',this)">🐓 Rooster</button>
-        <button class="sound-btn" data-sound="bell" onclick="selectSound('bell',this)">🔔 Bell</button>
-        <button class="sound-btn" data-sound="beep" onclick="selectSound('beep',this)">📡 Beep</button>
-        <button class="sound-btn" data-sound="chime" onclick="selectSound('chime',this)">🎵 Chime</button>
-        <button class="sound-btn" data-sound="buzz" onclick="selectSound('buzz',this)">⚡ Buzz</button>
-        <button class="sound-btn" data-sound="digital" onclick="selectSound('digital',this)">💻 Digital</button>
-        <button class="sound-btn" data-sound="rain" onclick="selectSound('rain',this)">🌧 Rain</button>
-        <button class="sound-btn" data-sound="birds" onclick="selectSound('birds',this)">🐦 Birds</button>
-        <button class="sound-btn" data-sound="ocean" onclick="selectSound('ocean',this)">🌊 Ocean</button>
-        <button class="sound-btn" data-sound="custom" onclick="selectSound('custom',this)" style="grid-column:span 3" id="txt-customSound">🎵 Custom Sound</button>
+
+    </div>
+
+  </header>
+
+  <!-- ================= NAVIGATION ================= -->
+
+  <nav class="nav-tabs">
+
+    <button class="nav-btn active"
+            data-page="clockPage">
+
+      🕐 Clock
+    </button>
+
+    <button class="nav-btn"
+            data-page="alarmPage">
+
+      ⏰ Alarm
+    </button>
+
+    <button class="nav-btn"
+            data-page="timerPage">
+
+      ⏱ Timer
+    </button>
+
+    <button class="nav-btn"
+            data-page="stopwatchPage">
+
+      🏁 Watch
+    </button>
+
+    <button class="nav-btn"
+            data-page="worldPage">
+
+      🌍 World
+    </button>
+
+    <button class="nav-btn"
+            data-page="settingsPage">
+
+      ⚙ Settings
+    </button>
+
+  </nav>
+
+  <!-- ================= MAIN ================= -->
+
+  <main class="pages">
+
+    <!-- ========================================= -->
+    <!-- CLOCK PAGE -->
+    <!-- ========================================= -->
+
+    <section class="page active"
+             id="clockPage">
+
+      <div class="panel main-clock-panel">
+
+        <div id="clockDisplay">
+          00:00:00
+        </div>
+
+        <div id="dateDisplay">
+          Loading...
+        </div>
+
       </div>
-      <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()" id="txt-uploadBtn">
-        📁 Upload MP3 / WAV
-        <input type="file" id="customSoundFile" accept="audio/*" style="display:none" onchange="handleCustomSound(this)">
+
+      <!-- Alarm Ringing -->
+      <div class="ring-box hidden"
+           id="ringBox">
+
+        <div class="ring-title">
+          ⏰ ALARM RINGING
+        </div>
+
+        <div class="ring-label"
+             id="ringAlarmLabel">
+
+          Wake Up
+        </div>
+
+        <div class="ring-actions">
+
+          <button class="neo-btn orange"
+                  id="snooze5Btn">
+
+            😴 5 MIN
+          </button>
+
+          <button class="neo-btn orange"
+                  id="snooze10Btn">
+
+            😴 10 MIN
+          </button>
+
+          <button class="neo-btn red"
+                  id="stopAlarmBtn">
+
+            ■ STOP
+          </button>
+
+        </div>
+
       </div>
-      <div class="custom-sound-name" id="customSoundName"></div>
-      <div class="range-row">
-        <label id="txt-volume">🔊 VOLUME</label>
-        <input type="range" id="alarmVol" min="0" max="100" value="80" oninput="updateVolDisplay(this.value)">
-        <span class="range-val" id="volVal">80%</span>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- ALARM PAGE -->
+    <!-- ========================================= -->
+
+    <section class="page"
+             id="alarmPage">
+
+      <div class="panel">
+
+        <div class="section-title">
+          CREATE ALARM
+        </div>
+
+        <!-- Time -->
+        <div class="form-group">
+
+          <label>
+            Alarm Time
+          </label>
+
+          <input type="time"
+                 id="alarmTime">
+
+        </div>
+
+        <!-- Label -->
+        <div class="form-group">
+
+          <label>
+            Alarm Label
+          </label>
+
+          <input type="text"
+                 id="alarmLabel"
+                 placeholder="Wake Up">
+
+        </div>
+
+        <!-- Sound -->
+        <div class="form-group">
+
+          <label>
+            Alarm Sound
+          </label>
+
+          <select id="alarmSound">
+
+            <option value="beep">
+              Digital Beep
+            </option>
+
+            <option value="bell">
+              Bell
+            </option>
+
+            <option value="alarm">
+              Emergency Alarm
+            </option>
+
+            <option value="soft">
+              Soft Tone
+            </option>
+
+          </select>
+
+        </div>
+
+        <!-- Volume -->
+        <div class="form-group">
+
+          <label>
+            Volume
+          </label>
+
+          <input type="range"
+                 min="0"
+                 max="100"
+                 value="80"
+                 id="alarmVolume">
+
+          <div class="range-value"
+               id="volumeText">
+
+            80%
+          </div>
+
+        </div>
+
+        <!-- Vibration -->
+        <div class="switch-row">
+
+          <div>
+            <h4>Vibration</h4>
+            <p>Phone vibrates during alarm</p>
+          </div>
+
+          <label class="switch">
+
+            <input type="checkbox"
+                   id="alarmVibration"
+                   checked>
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+        <!-- Gradual -->
+        <div class="switch-row">
+
+          <div>
+            <h4>Gradual Volume</h4>
+            <p>Volume slowly increases</p>
+          </div>
+
+          <label class="switch">
+
+            <input type="checkbox"
+                   id="gradualVolume"
+                   checked>
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+        <!-- Add -->
+        <button class="neo-btn cyan full"
+                id="createAlarmBtn">
+
+          + CREATE ALARM
+        </button>
+
       </div>
-      <div class="toggle-row">
-        <div><label id="txt-gradual">📈 GRADUAL VOLUME</label><span id="txt-gradualDesc">Slowly gets louder</span></div>
-        <label class="toggle"><input type="checkbox" id="gradualVol" checked><div class="toggle-track"></div></label>
+
+      <!-- Alarm List -->
+
+      <div class="panel">
+
+        <div class="section-title">
+          MY ALARMS
+        </div>
+
+        <div class="alarm-list"
+             id="alarmList">
+
+          <!-- JS Render -->
+
+        </div>
+
       </div>
-      <div class="toggle-row">
-        <div><label id="txt-vibration">📳 VIBRATION</label><span id="txt-vibrationDesc">Vibrate on alarm</span></div>
-        <label class="toggle"><input type="checkbox" id="vibration" checked><div class="toggle-track"></div></label>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- TIMER PAGE -->
+    <!-- ========================================= -->
+
+    <section class="page"
+             id="timerPage">
+
+      <div class="panel">
+
+        <div class="section-title">
+          COUNTDOWN TIMER
+        </div>
+
+        <div class="timer-display"
+             id="timerDisplay">
+
+          00:00:00
+        </div>
+
+        <div class="timer-inputs">
+
+          <input type="number"
+                 min="0"
+                 max="23"
+                 placeholder="HH"
+                 id="timerHours">
+
+          <input type="number"
+                 min="0"
+                 max="59"
+                 placeholder="MM"
+                 id="timerMinutes">
+
+          <input type="number"
+                 min="0"
+                 max="59"
+                 placeholder="SS"
+                 id="timerSeconds">
+
+        </div>
+
+        <div class="timer-buttons">
+
+          <button class="neo-btn cyan"
+                  id="startTimerBtn">
+
+            ▶ START
+          </button>
+
+          <button class="neo-btn"
+                  id="pauseTimerBtn">
+
+            ⏸ PAUSE
+          </button>
+
+          <button class="neo-btn"
+                  id="resetTimerBtn">
+
+            ↺ RESET
+          </button>
+
+        </div>
+
       </div>
-      <div class="sec-label" id="txt-snoozeSet">SNOOZE</div>
-      <div class="row">
-        <select id="snoozeTime">
-          <option value="5">5 min</option>
-          <option value="10" selected>10 min</option>
-          <option value="15">15 min</option>
-        </select>
-        <select id="snoozeLimit">
-          <option value="1">1x</option>
-          <option value="2">2x</option>
-          <option value="3" selected>3x</option>
-          <option value="5">5x</option>
-          <option value="99">Unlimited</option>
-        </select>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- STOPWATCH PAGE -->
+    <!-- ========================================= -->
+
+    <section class="page"
+             id="stopwatchPage">
+
+      <div class="panel">
+
+        <div class="section-title">
+          STOPWATCH
+        </div>
+
+        <div class="stopwatch-display"
+             id="stopwatchDisplay">
+
+          00:00:00.0
+        </div>
+
+        <div class="timer-buttons">
+
+          <button class="neo-btn cyan"
+                  id="startStopwatchBtn">
+
+            ▶ START
+          </button>
+
+          <button class="neo-btn"
+                  id="lapBtn">
+
+            🏁 LAP
+          </button>
+
+          <button class="neo-btn"
+                  id="resetStopwatchBtn">
+
+            ↺ RESET
+          </button>
+
+        </div>
+
+        <!-- Laps -->
+
+        <div class="lap-list"
+             id="lapList">
+
+        </div>
+
       </div>
-      <button class="btn btn-primary" onclick="addAlarm()" style="width:100%" id="txt-setBtn">+ SET ALARM</button>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- WORLD CLOCK -->
+    <!-- ========================================= -->
+
+    <section class="page"
+             id="worldPage">
+
+      <div class="panel">
+
+        <div class="section-title">
+          WORLD CLOCK
+        </div>
+
+        <div class="world-grid"
+             id="worldGrid">
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- SETTINGS -->
+    <!-- ========================================= -->
+
+    <section class="page"
+             id="settingsPage">
+
+      <div class="panel">
+
+        <div class="section-title">
+          SETTINGS
+        </div>
+
+        <!-- Theme -->
+
+        <div class="form-group">
+
+          <label>
+            Theme
+          </label>
+
+          <select id="themeSelect">
+
+            <option value="cyber">
+              Cyber Blue
+            </option>
+
+            <option value="matrix">
+              Matrix Green
+            </option>
+
+            <option value="purple">
+              Neon Purple
+            </option>
+
+            <option value="sunset">
+              Sunset Orange
+            </option>
+
+            <option value="light">
+              Light Mode
+            </option>
+
+          </select>
+
+        </div>
+
+        <!-- Format -->
+
+        <div class="switch-row">
+
+          <div>
+            <h4>24 Hour Format</h4>
+            <p>Use military time</p>
+          </div>
+
+          <label class="switch">
+
+            <input type="checkbox"
+                   id="format24">
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+        <!-- Clear -->
+
+        <button class="neo-btn red full"
+                id="clearAllBtn">
+
+          🗑 CLEAR ALL ALARMS
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+
+  <footer class="status-bar">
+
+    <div>
+      <span class="dot"></span>
+      ONLINE
     </div>
-  </div>
-  <div class="panel">
-    <div class="sec-label" id="txt-myAlarms">MY ALARMS</div>
-    <div class="alarm-list" id="alarmList">
-      <div class="no-alarms" id="noAlarms">[ NO ALARMS SET ]</div>
+
+    <div id="alarmCounter">
+      0 ALARMS
     </div>
-  </div>
+
+    <div>
+      v5.0
+    </div>
+
+  </footer>
+
 </div>
 
-<!-- TIMER PAGE -->
-<div class="page" id="page-timer">
-  <div class="panel">
-    <div class="sec-label" id="txt-timer">COUNTDOWN TIMER</div>
-    <div class="timer-display" id="timerDisplay">00:00:00</div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <input type="number" id="timerH" placeholder="HH" min="0" max="23" style="text-align:center">
-      <input type="number" id="timerM" placeholder="MM" min="0" max="59" style="text-align:center">
-      <input type="number" id="timerS" placeholder="SS" min="0" max="59" style="text-align:center">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-primary" onclick="startTimer()" style="flex:1" id="txt-start">▶ START</button>
-      <button class="btn btn-secondary" onclick="pauseTimer()" style="flex:1" id="txt-pause">⏸ PAUSE</button>
-      <button class="btn btn-secondary" onclick="resetTimer()" style="flex:1" id="txt-reset">↺ RESET</button>
-    </div>
-    <div id="timerFinish" style="display:none;text-align:center;margin-top:12px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);animation:alarmFlash 0.5s infinite" id="txt-timesup">⏰ TIME'S UP!</div>
-      <button class="btn btn-danger" onclick="stopTimerAlarm()" style="margin-top:8px" id="txt-stopTimer">■ STOP</button>
-    </div>
-  </div>
-</div>
+<!-- ================= AUDIO ================= -->
 
-<!-- STOPWATCH PAGE -->
-<div class="page" id="page-stopwatch">
-  <div class="panel">
-    <div class="sec-label" id="txt-stopwatch">STOPWATCH</div>
-    <div class="stopwatch-display" id="swDisplay">00:00:00.0</div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-primary" onclick="startSW()" style="flex:1" id="swStartBtn">▶ START</button>
-      <button class="btn btn-secondary" onclick="lapSW()" style="flex:1" id="txt-lap">🏁 LAP</button>
-      <button class="btn btn-secondary" onclick="resetSW()" style="flex:1" id="txt-resetSW">↺ RESET</button>
-    </div>
-    <div class="lap-list" id="lapList"></div>
-  </div>
-</div>
+<audio id="alarmAudio"
+       preload="auto"></audio>
 
-<!-- WORLD CLOCK -->
-<div class="page" id="page-world">
-  <div class="panel">
-    <div class="sec-label" id="txt-worldClock">WORLD CLOCK</div>
-    <div class="world-clocks" id="worldClocks"></div>
-  </div>
-</div>
+<!-- ================= PART 3 JS ================= -->
 
-<!-- SETTINGS PAGE -->
-<div class="page" id="page-settings">
-  <div class="panel">
-    <div class="sec-label" id="txt-themeLabel">THEME</div>
-    <div class="theme-grid" id="themeGrid"></div>
-  </div>
-  <div class="panel">
-    <div class="sec-label" id="txt-langLabel">LANGUAGE</div>
-    <div class="lang-grid" id="langGrid"></div>
-  </div>
-  <div class="panel">
-    <div class="sec-label" id="txt-appSettings">APP SETTINGS</div>
-    <div class="settings-row">
-      <label id="txt-timezone">🌍 HOME TIMEZONE</label>
-      <select id="homeTz" onchange="saveSettings()">
-        <option value="Asia/Kolkata">🇮🇳 India (IST)</option>
-        <option value="Europe/London">🇬🇧 UK (GMT/BST)</option>
-        <option value="America/Toronto">🇨🇦 Canada East</option>
-        <option value="America/New_York">🇺🇸 USA East</option>
-        <option value="America/Los_Angeles">🇺🇸 USA West</option>
-        <option value="Asia/Dubai">🇦🇪 Dubai (GST)</option>
-        <option value="Australia/Sydney">🇦🇺 Australia</option>
-        <option value="Asia/Tokyo">🇯🇵 Japan</option>
-        <option value="Europe/Paris">🇫🇷 France</option>
-        <option value="America/Vancouver">🇨🇦 Canada West</option>
-      </select>
-    </div>
-    <div class="settings-row toggle-row">
-      <div><label id="txt-24h">🌙 24 HOUR FORMAT</label></div>
-      <label class="toggle"><input type="checkbox" id="use24h" onchange="saveSettings()"><div class="toggle-track"></div></label>
-    </div>
-    <div class="settings-row">
-      <label style="color:var(--red);cursor:pointer" onclick="clearAllAlarms()" id="txt-clearAll">🗑 CLEAR ALL ALARMS</label>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="sec-label">ABOUT</div>
-    <div style="font-size:0.65rem;color:var(--dim);line-height:2">
-      <div>App: <span style="color:var(--glow)">Neo Alarm Clock</span></div>
-      <div>Version: <span style="color:var(--glow)">4.0.0</span></div>
-      <div>Sounds: <span style="color:var(--glow)">9 MP3 + Custom</span></div>
-      <div><span id="txt-features" style="color:var(--glow)">Timer · Stopwatch · World Clock · Themes · Languages</span></div>
-    </div>
-  </div>
-</div>
+<script src="app.js"></script>
 
-<div class="status-bar">
-  <div><span class="status-dot"></span><span id="txt-online">ONLINE</span></div>
-  <div id="alarmCount">0 ALARMS</div>
-  <div>v4.0.0</div>
-</div>
-</div>
-<script>
-let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
-let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber","lang":"en"}');
-let selectedSound='rooster',customSoundURL=null,ringingId=null,snoozeCount=0;
-let timerInterval=null,timerRemaining=0,timerRunning=false;
-let swInterval=null,swRunning=false,swElapsed=0,swLapTime=0,laps=[];
+</body>
+</html>
+/* =========================================
+PART 2 — STYLE.CSS
+Neo Alarm Clock v5
+========================================= */
 
-const soundFiles={
-  rooster:'sounds/Rooster.mp3',
-  bell:'sounds/Bell.mp3',
-  beep:'sounds/Beep.mp3',
-  chime:'sounds/chime.mp3',
-  buzz:'sounds/Buzz.mp3',
-  digital:'sounds/Digital.mp3',
-  rain:'sounds/Rain.mp3',
-  birds:'sounds/bird.mp3',
-  ocean:'sounds/Ocean.mp3'
-};
-
-const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
-
-const worldCities=[
-  {city:'INDIA',tz:'Asia/Kolkata',flag:'🇮🇳'},
-  {city:'UK',tz:'Europe/London',flag:'🇬🇧'},
-  {city:'CANADA E',tz:'America/Toronto',flag:'🇨🇦'},
-  {city:'USA EAST',tz:'America/New_York',flag:'🇺🇸'},
-  {city:'USA WEST',tz:'America/Los_Angeles',flag:'🇺🇸'},
-  {city:'DUBAI',tz:'Asia/Dubai',flag:'🇦🇪'},
-  {city:'AUSTRALIA',tz:'Australia/Sydney',flag:'🇦🇺'},
-  {city:'JAPAN',tz:'Asia/Tokyo',flag:'🇯🇵'},
-  {city:'FRANCE',tz:'Europe/Paris',flag:'🇫🇷'},
-  {city:'CANADA W',tz:'America/Vancouver',flag:'🇨🇦'}
-];
-
-const themes={
-  cyber:{name:'Cyber',bg:'#060a0f',panel:'#0d1520',border:'#1a3a5c',glow:'#00d4ff',text:'#cde8ff',dim:'#3a6080'},
-  dark:{name:'Dark',bg:'#0a0a0a',panel:'#141414',border:'#2a2a2a',glow:'#ffffff',text:'#e0e0e0',dim:'#555'},
-  green:{name:'Matrix',bg:'#010f01',panel:'#021402',border:'#0a3a0a',glow:'#00ff41',text:'#ccffcc',dim:'#1a5c1a'},
-  purple:{name:'Purple',bg:'#0a0514',panel:'#120a1e',border:'#2a1a4a',glow:'#bf5fff',text:'#e8ccff',dim:'#5a3a80'},
-  sunset:{name:'Sunset',bg:'#0f0805',panel:'#1e100a',border:'#4a2010',glow:'#ff6b35',text:'#ffe0cc',dim:'#804020'},
-  light:{name:'Light',bg:'#f0f4f8',panel:'#ffffff',border:'#c0d0e0',glow:'#0066cc',text:'#1a2a3a',dim:'#7a9ab0'}
-};
-
-// ── LANGUAGES ──────────────────────────────────────────
-const languages={
-  en:{name:'English',flag:'🇬🇧',
-    clock:'CLOCK',alarm:'ALARM',timer:'TIMER',watch:'WATCH',world:'WORLD',settings:'SETTINGS',
-    setAlarm:'SET NEW ALARM',chooseSound:'CHOOSE SOUND',volume:'🔊 VOLUME',
-    gradual:'📈 GRADUAL VOLUME',gradualDesc:'Slowly gets louder',
-    vibration:'📳 VIBRATION',vibrationDesc:'Vibrate on alarm',
-    snooze:'SNOOZE',setBtn:'+ SET ALARM',myAlarms:'MY ALARMS',
-    noAlarms:'[ NO ALARMS SET ]',wakeup:'⏰ ALARM RINGING!',
-    stop:'■ STOP',timerLabel:'COUNTDOWN TIMER',start:'▶ START',
-    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ TIME\'S UP!',
-    stopwatch:'STOPWATCH',lap:'🏁 LAP',worldClock:'WORLD CLOCK',
-    themeLabel:'THEME',langLabel:'LANGUAGE',appSettings:'APP SETTINGS',
-    timezone:'🌍 HOME TIMEZONE',format24:'🌙 24 HOUR FORMAT',
-    clearAll:'🗑 CLEAR ALL ALARMS',online:'ONLINE',customSound:'🎵 Custom Sound',
-    uploadBtn:'📁 Upload MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ CUSTOM'},
-
-  hi:{name:'हिंदी',flag:'🇮🇳',
-    clock:'घड़ी',alarm:'अलार्म',timer:'टाइमर',watch:'स्टॉपवॉच',world:'विश्व',settings:'सेटिंग',
-    setAlarm:'नया अलार्म सेट करें',chooseSound:'ध्वनि चुनें',volume:'🔊 आवाज़',
-    gradual:'📈 धीरे धीरे',gradualDesc:'धीरे-धीरे तेज होती है',
-    vibration:'📳 कंपन',vibrationDesc:'अलार्म पर कंपन',
-    snooze:'स्नूज़',setBtn:'+ अलार्म सेट करें',myAlarms:'मेरे अलार्म',
-    noAlarms:'[ कोई अलार्म नहीं ]',wakeup:'⏰ उठो! अलार्म बज रहा है!',
-    stop:'■ बंद करें',timerLabel:'काउंटडाउन टाइमर',start:'▶ शुरू',
-    pause:'⏸ रोकें',reset:'↺ रीसेट',timesup:'⏰ समय हो गया!',
-    stopwatch:'स्टॉपवॉच',lap:'🏁 लैप',worldClock:'विश्व घड़ी',
-    themeLabel:'थीम',langLabel:'भाषा',appSettings:'ऐप सेटिंग',
-    timezone:'🌍 समय क्षेत्र',format24:'🌙 24 घंटे',
-    clearAll:'🗑 सभी अलार्म हटाएं',online:'ऑनलाइन',customSound:'🎵 कस्टम ध्वनि',
-    uploadBtn:'📁 MP3 / WAV अपलोड करें',snooze5:'😴 5 मिनट',snooze10:'😴 10 मिनट',snoozeC:'⏱ कस्टम'},
-
-  ar:{name:'العربية',flag:'🇸🇦',
-    clock:'ساعة',alarm:'منبه',timer:'مؤقت',watch:'ساعة إيقاف',world:'العالم',settings:'إعدادات',
-    setAlarm:'ضبط منبه جديد',chooseSound:'اختر صوتاً',volume:'🔊 الصوت',
-    gradual:'📈 صوت تدريجي',gradualDesc:'يزداد تدريجياً',
-    vibration:'📳 اهتزاز',vibrationDesc:'اهتزاز عند المنبه',
-    snooze:'غفوة',setBtn:'+ ضبط منبه',myAlarms:'منبهاتي',
-    noAlarms:'[ لا توجد منبهات ]',wakeup:'⏰ المنبه يرن!',
-    stop:'■ إيقاف',timerLabel:'مؤقت العد التنازلي',start:'▶ ابدأ',
-    pause:'⏸ توقف',reset:'↺ إعادة',timesup:'⏰ انتهى الوقت!',
-    stopwatch:'ساعة إيقاف',lap:'🏁 لفة',worldClock:'ساعة العالم',
-    themeLabel:'المظهر',langLabel:'اللغة',appSettings:'إعدادات التطبيق',
-    timezone:'🌍 المنطقة الزمنية',format24:'🌙 24 ساعة',
-    clearAll:'🗑 مسح جميع المنبهات',online:'متصل',customSound:'🎵 صوت مخصص',
-    uploadBtn:'📁 رفع MP3 / WAV',snooze5:'😴 5 دقائق',snooze10:'😴 10 دقائق',snoozeC:'⏱ مخصص'},
-
-  fr:{name:'Français',flag:'🇫🇷',
-    clock:'HORLOGE',alarm:'ALARME',timer:'MINUTEUR',watch:'CHRONO',world:'MONDE',settings:'RÉGLAGES',
-    setAlarm:'NOUVELLE ALARME',chooseSound:'CHOISIR SON',volume:'🔊 VOLUME',
-    gradual:'📈 VOLUME PROGRESSIF',gradualDesc:'Monte progressivement',
-    vibration:'📳 VIBRATION',vibrationDesc:'Vibrer à l\'alarme',
-    snooze:'RAPPEL',setBtn:'+ RÉGLER ALARME',myAlarms:'MES ALARMES',
-    noAlarms:'[ AUCUNE ALARME ]',wakeup:'⏰ RÉVEIL!',
-    stop:'■ ARRÊT',timerLabel:'MINUTEUR',start:'▶ DÉBUT',
-    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ TEMPS ÉCOULÉ!',
-    stopwatch:'CHRONOMÈTRE',lap:'🏁 TOUR',worldClock:'HORLOGE MONDIALE',
-    themeLabel:'THÈME',langLabel:'LANGUE',appSettings:'PARAMÈTRES',
-    timezone:'🌍 FUSEAU HORAIRE',format24:'🌙 FORMAT 24H',
-    clearAll:'🗑 EFFACER ALARMES',online:'EN LIGNE',customSound:'🎵 Son Personnalisé',
-    uploadBtn:'📁 Importer MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONNALISÉ'},
-
-  es:{name:'Español',flag:'🇪🇸',
-    clock:'RELOJ',alarm:'ALARMA',timer:'TEMPORIZADOR',watch:'CRONÓMETRO',world:'MUNDO',settings:'AJUSTES',
-    setAlarm:'NUEVA ALARMA',chooseSound:'ELEGIR SONIDO',volume:'🔊 VOLUMEN',
-    gradual:'📈 VOLUMEN GRADUAL',gradualDesc:'Sube gradualmente',
-    vibration:'📳 VIBRACIÓN',vibrationDesc:'Vibrar en alarma',
-    snooze:'POSPONER',setBtn:'+ PONER ALARMA',myAlarms:'MIS ALARMAS',
-    noAlarms:'[ SIN ALARMAS ]',wakeup:'⏰ ¡ALARMA!',
-    stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIO',
-    pause:'⏸ PAUSA',reset:'↺ RESET',timesup:'⏰ ¡TIEMPO!',
-    stopwatch:'CRONÓMETRO',lap:'🏁 VUELTA',worldClock:'RELOJ MUNDIAL',
-    themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURACIÓN',
-    timezone:'🌍 ZONA HORARIA',format24:'🌙 FORMATO 24H',
-    clearAll:'🗑 BORRAR ALARMAS',online:'EN LÍNEA',customSound:'🎵 Sonido Personalizado',
-    uploadBtn:'📁 Subir MP3 / WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
-
-  de:{name:'Deutsch',flag:'🇩🇪',
-    clock:'UHR',alarm:'ALARM',timer:'TIMER',watch:'STOPPUHR',world:'WELT',settings:'EINSTELLUNG',
-    setAlarm:'NEUER ALARM',chooseSound:'TON WÄHLEN',volume:'🔊 LAUTSTÄRKE',
-    gradual:'📈 SANFTER START',gradualDesc:'Wird langsam lauter',
-    vibration:'📳 VIBRATION',vibrationDesc:'Vibration bei Alarm',
-    snooze:'SCHLUMMER',setBtn:'+ ALARM STELLEN',myAlarms:'MEINE ALARME',
-    noAlarms:'[ KEINE ALARME ]',wakeup:'⏰ ALARM!',
-    stop:'■ STOP',timerLabel:'COUNTDOWN',start:'▶ START',
-    pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ ZEIT IST UM!',
-    stopwatch:'STOPPUHR',lap:'🏁 RUNDE',worldClock:'WELTUHR',
-    themeLabel:'DESIGN',langLabel:'SPRACHE',appSettings:'EINSTELLUNGEN',
-    timezone:'🌍 ZEITZONE',format24:'🌙 24H FORMAT',
-    clearAll:'🗑 ALARME LÖSCHEN',online:'ONLINE',customSound:'🎵 Eigener Ton',
-    uploadBtn:'📁 MP3 / WAV Hochladen',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ BENUTZERDEFINIERT'},
-
-  ja:{name:'日本語',flag:'🇯🇵',
-    clock:'時計',alarm:'アラーム',timer:'タイマー',watch:'ストップウォッチ',world:'世界',settings:'設定',
-    setAlarm:'アラーム設定',chooseSound:'サウンド選択',volume:'🔊 音量',
-    gradual:'📈 徐々に大きく',gradualDesc:'徐々に音が大きくなります',
-    vibration:'📳 バイブレーション',vibrationDesc:'アラーム時に振動',
-    snooze:'スヌーズ',setBtn:'+ アラーム設定',myAlarms:'マイアラーム',
-    noAlarms:'[ アラームなし ]',wakeup:'⏰ アラーム！',
-    stop:'■ 停止',timerLabel:'カウントダウン',start:'▶ スタート',
-    pause:'⏸ 一時停止',reset:'↺ リセット',timesup:'⏰ 時間です！',
-    stopwatch:'ストップウォッチ',lap:'🏁 ラップ',worldClock:'世界時計',
-    themeLabel:'テーマ',langLabel:'言語',appSettings:'アプリ設定',
-    timezone:'🌍 タイムゾーン',format24:'🌙 24時間',
-    clearAll:'🗑 全削除',online:'オンライン',customSound:'🎵 カスタム音',
-    uploadBtn:'📁 MP3/WAV アップロード',snooze5:'😴 5分',snooze10:'😴 10分',snoozeC:'⏱ カスタム'},
-
-  zh:{name:'中文',flag:'🇨🇳',
-    clock:'时钟',alarm:'闹钟',timer:'计时器',watch:'秒表',world:'世界',settings:'设置',
-    setAlarm:'设置闹钟',chooseSound:'选择声音',volume:'🔊 音量',
-    gradual:'📈 渐强音量',gradualDesc:'声音逐渐增大',
-    vibration:'📳 振动',vibrationDesc:'闹钟时振动',
-    snooze:'贪睡',setBtn:'+ 设置闹钟',myAlarms:'我的闹钟',
-    noAlarms:'[ 没有闹钟 ]',wakeup:'⏰ 闹钟响了！',
-    stop:'■ 停止',timerLabel:'倒计时',start:'▶ 开始',
-    pause:'⏸ 暂停',reset:'↺ 重置',timesup:'⏰ 时间到！',
-    stopwatch:'秒表',lap:'🏁 圈',worldClock:'世界时钟',
-    themeLabel:'主题',langLabel:'语言',appSettings:'应用设置',
-    timezone:'🌍 时区',format24:'🌙 24小时制',
-    clearAll:'🗑 清除所有闹钟',online:'在线',customSound:'🎵 自定义声音',
-    uploadBtn:'📁 上传 MP3/WAV',snooze5:'😴 5分钟',snooze10:'😴 10分钟',snoozeC:'⏱ 自定义'},
-
-  pt:{name:'Português',flag:'🇧🇷',
-    clock:'RELÓGIO',alarm:'ALARME',timer:'TEMPORIZADOR',watch:'CRONÔMETRO',world:'MUNDO',settings:'CONFIGURAR',
-    setAlarm:'NOVO ALARME',chooseSound:'ESCOLHER SOM',volume:'🔊 VOLUME',
-    gradual:'📈 VOLUME GRADUAL',gradualDesc:'Aumenta gradualmente',
-    vibration:'📳 VIBRAÇÃO',vibrationDesc:'Vibrar no alarme',
-    snooze:'SONECA',setBtn:'+ DEFINIR ALARME',myAlarms:'MEUS ALARMES',
-    noAlarms:'[ SEM ALARMES ]',wakeup:'⏰ ALARME!',
-    stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIAR',
-    pause:'⏸ PAUSAR',reset:'↺ RESET',timesup:'⏰ TEMPO ESGOTADO!',
-    stopwatch:'CRONÔMETRO',lap:'🏁 VOLTA',worldClock:'RELÓGIO MUNDIAL',
-    themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURAÇÕES',
-    timezone:'🌍 FUSO HORÁRIO',format24:'🌙 FORMATO 24H',
-    clearAll:'🗑 APAGAR ALARMES',online:'ON-LINE',customSound:'🎵 Som Personalizado',
-    uploadBtn:'📁 Enviar MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
-
-  ru:{name:'Русский',flag:'🇷🇺',
-    clock:'ЧАСЫ',alarm:'БУДИЛЬНИК',timer:'ТАЙМЕР',watch:'СЕКУНДОМЕР',world:'МИР',settings:'НАСТРОЙКИ',
-    setAlarm:'НОВЫЙ БУДИЛЬНИК',chooseSound:'ВЫБОР ЗВУКА',volume:'🔊 ГРОМКОСТЬ',
-    gradual:'📈 НАРАСТАНИЕ',gradualDesc:'Постепенно громче',
-    vibration:'📳 ВИБРАЦИЯ',vibrationDesc:'Вибрация при будильнике',
-    snooze:'ДРЕМОТА',setBtn:'+ УСТАНОВИТЬ',myAlarms:'МОИ БУДИЛЬНИКИ',
-    noAlarms:'[ НЕТ БУДИЛЬНИКОВ ]',wakeup:'⏰ БУДИЛЬНИК!',
-    stop:'■ СТОП',timerLabel:'ОБРАТНЫЙ ОТСЧЁТ',start:'▶ СТАРТ',
-    pause:'⏸ ПАУЗА',reset:'↺ СБРОС',timesup:'⏰ ВРЕМЯ ВЫШЛО!',
-    stopwatch:'СЕКУНДОМЕР',lap:'🏁 КРУГ',worldClock:'МИРОВЫЕ ЧАСЫ',
-    themeLabel:'ТЕМА',langLabel:'ЯЗЫК',appSettings:'НАСТРОЙКИ',
-    timezone:'🌍 ЧАСОВОЙ ПОЯС',format24:'🌙 24 ЧАСА',
-    clearAll:'🗑 УДАЛИТЬ ВСЕ',online:'В СЕТИ',customSound:'🎵 Свой звук',
-    uploadBtn:'📁 Загрузить MP3/WAV',snooze5:'😴 5 МИН',snooze10:'😴 10 МИН',snoozeC:'⏱ ДРУГОЕ'},
-
-  ko:{name:'한국어',flag:'🇰🇷',
-    clock:'시계',alarm:'알람',timer:'타이머',watch:'스톱워치',world:'세계',settings:'설정',
-    setAlarm:'알람 설정',chooseSound:'소리 선택',volume:'🔊 볼륨',
-    gradual:'📈 점진적 볼륨',gradualDesc:'서서히 커집니다',
-    vibration:'📳 진동',vibrationDesc:'알람 시 진동',
-    snooze:'스누즈',setBtn:'+ 알람 설정',myAlarms:'내 알람',
-    noAlarms:'[ 알람 없음 ]',wakeup:'⏰ 알람!',
-    stop:'■ 정지',timerLabel:'카운트다운',start:'▶ 시작',
-    pause:'⏸ 일시정지',reset:'↺ 초기화',timesup:'⏰ 시간 종료!',
-    stopwatch:'스톱워치',lap:'🏁 랩',worldClock:'세계 시계',
-    themeLabel:'테마',langLabel:'언어',appSettings:'앱 설정',
-    timezone:'🌍 시간대',format24:'🌙 24시간',
-    clearAll:'🗑 모두 삭제',online:'온라인',customSound:'🎵 커스텀 사운드',
-    uploadBtn:'📁 MP3/WAV 업로드',snooze5:'😴 5분',snooze10:'😴 10분',snoozeC:'⏱ 직접입력'}
-};
-
-// ── Apply Language ──────────────────────
-function applyLang(key){
-  const l=languages[key];if(!l)return;
-  settings.lang=key;
-  localStorage.setItem('settings',JSON.stringify(settings));
-
-  // Nav tabs
-  document.getElementById('nav-clock').textContent='🕐 '+l.clock;
-  document.getElementById('nav-alarm').textContent='⏰ '+l.alarm;
-  document.getElementById('nav-timer').textContent='⏱ '+l.timer;
-  document.getElementById('nav-stopwatch').textContent='⏲ '+l.watch;
-  document.getElementById('nav-world').textContent='🌍 '+l.world;
-  document.getElementById('nav-settings').textContent='⚙️ '+l.settings;
-
-  // Alarm page
-  document.getElementById('txt-setAlarm').firstChild.textContent=l.setAlarm+' ';
-  document.getElementById('txt-chooseSound').firstChild.textContent=l.chooseSound+' ';
-  document.getElementById('txt-volume').textContent=l.volume;
-  document.getElementById('txt-gradual').textContent=l.gradual;
-  document.getElementById('txt-gradualDesc').textContent=l.gradualDesc;
-  document.getElementById('txt-vibration').textContent=l.vibration;
-  document.getElementById('txt-vibrationDesc').textContent=l.vibrationDesc;
-  document.getElementById('txt-snoozeSet').firstChild.textContent=l.snooze+' ';
-  document.getElementById('txt-setBtn').textContent=l.setBtn;
-  document.getElementById('txt-myAlarms').firstChild.textContent=l.myAlarms+' ';
-  document.getElementById('noAlarms').textContent=l.noAlarms;
-  document.getElementById('txt-customSound').textContent=l.customSound;
-  document.getElementById('txt-uploadBtn').childNodes[0].textContent=l.uploadBtn+' ';
-
-  // Ringing
-  document.getElementById('txt-wakeup').textContent=l.wakeup;
-  document.getElementById('txt-stop').textContent=l.stop;
-  document.getElementById('txt-snooze5').textContent=l.snooze5;
-  document.getElementById('txt-snooze10').textContent=l.snooze10;
-  document.getElementById('txt-snoozeC').textContent=l.snoozeC;
-
-  // Timer
-  document.getElementById('txt-timer').firstChild.textContent=l.timerLabel+' ';
-  document.getElementById('txt-start').textContent=l.start;
-  document.getElementById('txt-pause').textContent=l.pause;
-  document.getElementById('txt-reset').textContent=l.reset;
-  document.getElementById('txt-timesup').textContent=l.timesup;
-  document.getElementById('txt-stopTimer').textContent=l.stop;
-
-  // Stopwatch
-  document.getElementById('txt-stopwatch').firstChild.textContent=l.stopwatch+' ';
-  document.getElementById('swStartBtn').textContent=(swRunning?'⏹ ':' ▶ ')+l.start;
-  document.getElementById('txt-lap').textContent=l.lap;
-  document.getElementById('txt-resetSW').textContent=l.reset;
-
-  // World
-  document.getElementById('txt-worldClock').firstChild.textContent=l.worldClock+' ';
-
-  // Settings
-  document.getElementById('txt-themeLabel').firstChild.textContent=l.themeLabel+' ';
-  document.getElementById('txt-langLabel').firstChild.textContent=l.langLabel+' ';
-  document.getElementById('txt-appSettings').firstChild.textContent=l.appSettings+' ';
-  document.getElementById('txt-timezone').textContent=l.timezone;
-  document.getElementById('txt-24h').textContent=l.format24;
-  document.getElementById('txt-clearAll').textContent=l.clearAll;
-  document.getElementById('txt-online').textContent=l.online;
-
-  // Lang grid highlight
-  document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.lang===key));
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-function renderLangs(){
-  const grid=document.getElementById('langGrid');
-  grid.innerHTML=Object.entries(languages).map(([k,l])=>`
-    <div class="lang-card${settings.lang===k?' active':''}" data-lang="${k}" onclick="applyLang('${k}')">
-      <div style="font-size:1.2rem">${l.flag}</div>
-      <div>${l.name}</div>
-    </div>`).join('');
+:root{
+
+  --bg:#071018;
+  --panel:#0d1722;
+  --border:#17344f;
+
+  --cyan:#00d9ff;
+  --cyan-soft:#00a2c0;
+
+  --red:#ff3d57;
+  --orange:#ff9b42;
+  --green:#00ff9c;
+
+  --text:#d9f3ff;
+  --muted:#4f7999;
+
+  --shadow:0 0 25px rgba(0,217,255,0.18);
+  --radius:14px;
 }
 
-// ── Navigation ──────────────────────────
-function showPage(p,btn){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  if(btn)btn.classList.add('active');
+/* ================= BODY ================= */
+
+body{
+  background:var(--bg);
+  color:var(--text);
+
+  font-family:'Share Tech Mono',monospace;
+
+  min-height:100vh;
+  overflow-x:hidden;
+
+  position:relative;
 }
 
-// ── Theme ───────────────────────────────
-function applyTheme(key){
-  const t=themes[key];if(!t)return;
-  const r=document.documentElement.style;
-  r.setProperty('--bg',t.bg);r.setProperty('--panel',t.panel);
-  r.setProperty('--border',t.border);r.setProperty('--glow',t.glow);
-  r.setProperty('--text',t.text);r.setProperty('--dim',t.dim);
-  settings.theme=key;
-  localStorage.setItem('settings',JSON.stringify(settings));
-  document.querySelectorAll('.theme-card').forEach(c=>c.classList.toggle('active',c.dataset.theme===key));
+/* GRID BACKGROUND */
+
+body::before{
+  content:'';
+
+  position:fixed;
+  inset:0;
+
+  background-image:
+  linear-gradient(rgba(0,217,255,0.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,217,255,0.04) 1px,transparent 1px);
+
+  background-size:42px 42px;
+
+  pointer-events:none;
+  z-index:0;
 }
 
-function renderThemes(){
-  const grid=document.getElementById('themeGrid');
-  grid.innerHTML=Object.entries(themes).map(([k,t])=>`
-    <div class="theme-card${settings.theme===k?' active':''}" data-theme="${k}" onclick="applyTheme('${k}')" style="background:${t.panel};border-color:${settings.theme===k?t.glow:t.border}">
-      <div class="theme-dot" style="background:${t.glow};box-shadow:0 0 8px ${t.glow}"></div>
-      <div style="color:${t.text};font-size:0.6rem">${t.name}</div>
-    </div>`).join('');
+/* ================= APP ================= */
+
+.app{
+  position:relative;
+  z-index:5;
+
+  width:100%;
+  max-width:560px;
+
+  margin:auto;
+  padding:16px;
 }
 
-// ── Clock ───────────────────────────────
+/* ================= TOPBAR ================= */
+
+.topbar{
+  margin-bottom:18px;
+}
+
+.logo-box{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+/* ================= LOGO CLOCK ================= */
+
+.logo-clock{
+  width:70px;
+  height:70px;
+
+  filter:drop-shadow(0 0 12px rgba(0,217,255,0.5));
+}
+
+.clock-ring{
+  fill:none;
+  stroke:var(--cyan);
+  stroke-width:3;
+}
+
+.clock-center{
+  fill:var(--cyan);
+}
+
+.hour-hand{
+  stroke:var(--cyan);
+  stroke-width:4;
+  stroke-linecap:round;
+
+  transform-origin:center;
+}
+
+.minute-hand{
+  stroke:white;
+  stroke-width:3;
+  stroke-linecap:round;
+
+  transform-origin:center;
+}
+
+.second-hand{
+  stroke:var(--red);
+  stroke-width:2;
+  stroke-linecap:round;
+
+  transform-origin:center;
+}
+
+/* ================= TITLES ================= */
+
+.app-title{
+  font-family:'Orbitron',sans-serif;
+
+  font-size:1.5rem;
+  font-weight:900;
+
+  letter-spacing:2px;
+
+  color:var(--cyan);
+
+  text-shadow:
+  0 0 10px var(--cyan),
+  0 0 20px rgba(0,217,255,0.35);
+}
+
+.app-sub{
+  color:var(--muted);
+  font-size:0.8rem;
+  margin-top:4px;
+}
+
+/* ================= NAV ================= */
+
+.nav-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+
+  gap:8px;
+
+  margin-bottom:18px;
+}
+
+.nav-btn{
+  border:1px solid var(--border);
+
+  background:rgba(255,255,255,0.02);
+
+  color:var(--muted);
+
+  padding:12px 6px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  font-size:0.72rem;
+  font-family:'Orbitron',sans-serif;
+
+  transition:0.25s;
+}
+
+.nav-btn:hover{
+  border-color:var(--cyan);
+  color:var(--cyan);
+}
+
+.nav-btn.active{
+  background:rgba(0,217,255,0.1);
+
+  border-color:var(--cyan);
+
+  color:var(--cyan);
+
+  box-shadow:var(--shadow);
+}
+
+/* ================= PAGES ================= */
+
+.page{
+  display:none;
+  animation:fade 0.3s ease;
+}
+
+.page.active{
+  display:block;
+}
+
+@keyframes fade{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* ================= PANEL ================= */
+
+.panel{
+  background:var(--panel);
+
+  border:1px solid var(--border);
+
+  border-radius:var(--radius);
+
+  padding:18px;
+
+  margin-bottom:18px;
+
+  position:relative;
+
+  overflow:hidden;
+}
+
+/* CORNERS */
+
+.panel::before,
+.panel::after{
+  content:'';
+
+  position:absolute;
+
+  width:16px;
+  height:16px;
+}
+
+.panel::before{
+  top:8px;
+  left:8px;
+
+  border-top:2px solid var(--cyan);
+  border-left:2px solid var(--cyan);
+}
+
+.panel::after{
+  right:8px;
+  bottom:8px;
+
+  border-right:2px solid var(--cyan);
+  border-bottom:2px solid var(--cyan);
+}
+
+/* ================= SECTION TITLE ================= */
+
+.section-title{
+  font-size:0.72rem;
+
+  color:var(--muted);
+
+  letter-spacing:3px;
+
+  margin-bottom:18px;
+
+  text-transform:uppercase;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.section-title::after{
+  content:'';
+
+  height:1px;
+  flex:1;
+
+  background:var(--border);
+}
+
+/* ================= MAIN CLOCK ================= */
+
+.main-clock-panel{
+  text-align:center;
+}
+
+#clockDisplay{
+  font-family:'Orbitron',sans-serif;
+
+  font-size:clamp(2.6rem,13vw,5rem);
+
+  font-weight:700;
+
+  color:var(--cyan);
+
+  letter-spacing:3px;
+
+  text-shadow:
+  0 0 18px var(--cyan),
+  0 0 35px rgba(0,217,255,0.35);
+}
+
+#dateDisplay{
+  margin-top:10px;
+
+  color:var(--muted);
+
+  letter-spacing:2px;
+
+  font-size:0.8rem;
+}
+
+/* ================= FORM ================= */
+
+.form-group{
+  margin-bottom:18px;
+}
+
+.form-group label{
+  display:block;
+
+  margin-bottom:8px;
+
+  color:var(--muted);
+
+  font-size:0.8rem;
+}
+
+input,
+select{
+  width:100%;
+
+  border:1px solid var(--border);
+
+  background:#08111b;
+
+  color:var(--text);
+
+  padding:14px;
+
+  border-radius:10px;
+
+  font-family:inherit;
+
+  outline:none;
+
+  transition:0.25s;
+}
+
+input:focus,
+select:focus{
+  border-color:var(--cyan);
+
+  box-shadow:
+  0 0 0 2px rgba(0,217,255,0.08);
+}
+
+/* TIME INPUT */
+
+input[type="time"]{
+  font-size:1.1rem;
+
+  font-family:'Orbitron',sans-serif;
+
+  color:var(--cyan);
+}
+
+/* RANGE */
+
+input[type="range"]{
+  accent-color:var(--cyan);
+  cursor:pointer;
+}
+
+.range-value{
+  text-align:right;
+
+  color:var(--cyan);
+
+  margin-top:5px;
+}
+
+/* ================= BUTTONS ================= */
+
+.neo-btn{
+  border:none;
+
+  padding:14px 16px;
+
+  border-radius:12px;
+
+  cursor:pointer;
+
+  font-family:'Orbitron',sans-serif;
+
+  font-size:0.72rem;
+
+  letter-spacing:1px;
+
+  transition:0.25s;
+
+  background:#0d1720;
+
+  color:var(--text);
+
+  border:1px solid var(--border);
+}
+
+.neo-btn:hover{
+  transform:translateY(-2px);
+}
+
+.neo-btn.cyan{
+  background:var(--cyan);
+
+  color:black;
+
+  font-weight:700;
+
+  box-shadow:var(--shadow);
+}
+
+.neo-btn.red{
+  background:var(--red);
+
+  color:white;
+}
+
+.neo-btn.orange{
+  background:rgba(255,155,66,0.12);
+
+  border-color:var(--orange);
+
+  color:var(--orange);
+}
+
+.neo-btn.full{
+  width:100%;
+}
+
+/* ================= SWITCH ================= */
+
+.switch-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:16px;
+
+  margin-bottom:18px;
+
+  padding-bottom:14px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.switch-row h4{
+  font-size:0.9rem;
+  margin-bottom:4px;
+}
+
+.switch-row p{
+  font-size:0.7rem;
+  color:var(--muted);
+}
+
+.switch{
+  position:relative;
+
+  width:54px;
+  height:28px;
+
+  flex-shrink:0;
+}
+
+.switch input{
+  display:none;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+
+  background:#0a121a;
+
+  border:1px solid var(--border);
+
+  border-radius:999px;
+
+  cursor:pointer;
+
+  transition:0.25s;
+}
+
+.slider::before{
+  content:'';
+
+  position:absolute;
+
+  width:20px;
+  height:20px;
+
+  border-radius:50%;
+
+  background:var(--muted);
+
+  left:3px;
+  top:3px;
+
+  transition:0.25s;
+}
+
+.switch input:checked + .slider{
+  background:rgba(0,217,255,0.12);
+
+  border-color:var(--cyan);
+}
+
+.switch input:checked + .slider::before{
+  transform:translateX(26px);
+
+  background:var(--cyan);
+
+  box-shadow:0 0 12px var(--cyan);
+}
+
+/* ================= ALARM LIST ================= */
+
+.alarm-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.alarm-item{
+  background:#08111b;
+
+  border:1px solid var(--border);
+
+  border-radius:12px;
+
+  padding:14px;
+}
+
+.alarm-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.alarm-time{
+  font-family:'Orbitron',sans-serif;
+
+  font-size:1.4rem;
+
+  color:var(--cyan);
+}
+
+.alarm-label{
+  margin-top:6px;
+
+  color:var(--muted);
+
+  font-size:0.8rem;
+}
+
+.alarm-actions{
+  display:flex;
+  gap:8px;
+}
+
+.small-btn{
+  width:34px;
+  height:34px;
+
+  border-radius:10px;
+
+  border:1px solid var(--border);
+
+  background:#0e1823;
+
+  color:var(--text);
+
+  cursor:pointer;
+}
+
+/* ================= TIMER ================= */
+
+.timer-display,
+.stopwatch-display{
+  text-align:center;
+
+  font-family:'Orbitron',sans-serif;
+
+  font-size:clamp(2.2rem,11vw,4rem);
+
+  color:var(--cyan);
+
+  margin-bottom:20px;
+
+  text-shadow:
+  0 0 18px var(--cyan);
+}
+
+.timer-inputs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+
+  gap:10px;
+
+  margin-bottom:18px;
+}
+
+.timer-inputs input{
+  text-align:center;
+}
+
+/* BUTTON ROW */
+
+.timer-buttons{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+
+  gap:10px;
+}
+
+/* ================= LAPS ================= */
+
+.lap-list{
+  margin-top:18px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  max-height:240px;
+
+  overflow-y:auto;
+}
+
+.lap-item{
+  display:flex;
+  justify-content:space-between;
+
+  padding:10px;
+
+  border-radius:10px;
+
+  border:1px solid var(--border);
+
+  background:#08111b;
+
+  font-size:0.8rem;
+}
+
+/* ================= WORLD CLOCK ================= */
+
+.world-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+
+  gap:12px;
+}
+
+.world-card{
+  background:#08111b;
+
+  border:1px solid var(--border);
+
+  border-radius:12px;
+
+  padding:14px;
+}
+
+.world-city{
+  color:var(--muted);
+
+  font-size:0.72rem;
+
+  margin-bottom:6px;
+}
+
+.world-time{
+  color:var(--cyan);
+
+  font-family:'Orbitron',sans-serif;
+
+  font-size:1.2rem;
+}
+
+/* ================= RING BOX ================= */
+
+.ring-box{
+  margin-top:18px;
+
+  background:rgba(255,61,87,0.08);
+
+  border:1px solid var(--red);
+
+  border-radius:14px;
+
+  padding:18px;
+
+  text-align:center;
+
+  animation:ringPulse 1s infinite;
+}
+
+@keyframes ringPulse{
+  0%,100%{
+    box-shadow:0 0 15px rgba(255,61,87,0.2);
+  }
+
+  50%{
+    box-shadow:0 0 35px rgba(255,61,87,0.45);
+  }
+}
+
+.ring-title{
+  font-family:'Orbitron',sans-serif;
+
+  color:var(--red);
+
+  margin-bottom:8px;
+
+  font-size:1rem;
+}
+
+.ring-label{
+  margin-bottom:16px;
+
+  color:#ffd9df;
+}
+
+.ring-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* ================= OVERLAY ================= */
+
+.ring-overlay{
+  position:fixed;
+  inset:0;
+
+  pointer-events:none;
+
+  background:rgba(255,61,87,0.06);
+
+  opacity:0;
+
+  z-index:2;
+
+  transition:0.3s;
+}
+
+.ring-overlay.show{
+  opacity:1;
+}
+
+/* ================= STATUS BAR ================= */
+
+.status-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  gap:12px;
+
+  font-size:0.72rem;
+
+  color:var(--muted);
+
+  padding-bottom:20px;
+}
+
+.dot{
+  width:8px;
+  height:8px;
+
+  border-radius:50%;
+
+  background:var(--green);
+
+  display:inline-block;
+
+  margin-right:6px;
+
+  box-shadow:0 0 12px var(--green);
+
+  animation:blink 2s infinite;
+}
+
+@keyframes blink{
+  0%,100%{
+    opacity:1;
+  }
+
+  50%{
+    opacity:0.3;
+  }
+}
+
+/* ================= UTIL ================= */
+
+.hidden{
+  display:none;
+}
+
+/* ================= SCROLLBAR ================= */
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:var(--border);
+  border-radius:999px;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:520px){
+
+  .nav-tabs{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .timer-buttons{
+    grid-template-columns:1fr;
+  }
+
+  .world-grid{
+    grid-template-columns:1fr;
+  }
+
+  .timer-inputs{
+    grid-template-columns:1fr;
+  }
+
+  .app-title{
+    font-size:1.2rem;
+  }
+
+}
+/* =========================================
+PART 3 — APP.JS
+Neo Alarm Clock v5
+========================================= */
+
+/* =========================
+STATE
+========================= */
+
+let alarms = JSON.parse(localStorage.getItem("neoAlarms")) || [];
+
+let currentTheme =
+localStorage.getItem("neoTheme") || "cyber";
+
+let use24Hour =
+localStorage.getItem("neo24h") === "true";
+
+let ringingAlarm = null;
+
+let alarmInterval = null;
+
+/* TIMER */
+
+let timerSeconds = 0;
+let timerRunning = false;
+let timerInterval = null;
+
+/* STOPWATCH */
+
+let stopwatchRunning = false;
+let stopwatchTime = 0;
+let stopwatchInterval = null;
+let lapCount = 0;
+
+/* AUDIO */
+
+const alarmAudio =
+document.getElementById("alarmAudio");
+
+/* =========================
+ELEMENTS
+========================= */
+
+const clockDisplay =
+document.getElementById("clockDisplay");
+
+const dateDisplay =
+document.getElementById("dateDisplay");
+
+const alarmList =
+document.getElementById("alarmList");
+
+const alarmCounter =
+document.getElementById("alarmCounter");
+
+/* =========================
+NAVIGATION
+========================= */
+
+document
+.querySelectorAll(".nav-btn")
+.forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    document
+    .querySelectorAll(".nav-btn")
+    .forEach(b=>b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    const page = btn.dataset.page;
+
+    document
+    .querySelectorAll(".page")
+    .forEach(p=>p.classList.remove("active"));
+
+    document
+    .getElementById(page)
+    .classList.add("active");
+
+  });
+
+});
+
+/* =========================
+LIVE CLOCK
+========================= */
+
 function updateClock(){
-  const now=new Date();
-  document.getElementById('clock').textContent=now.toLocaleTimeString('en-US',{timeZone:settings.homeTz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!settings.use24h});
-  document.getElementById('date').textContent=now.toLocaleDateString('en-US',{timeZone:settings.homeTz,weekday:'long',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
-  checkAlarms(now);syncLogo(now);updateWorldClocks(now);
+
+  const now = new Date();
+
+  /* TIME */
+
+  let options = {
+
+    hour:'2-digit',
+    minute:'2-digit',
+    second:'2-digit',
+
+    hour12:!use24Hour
+  };
+
+  clockDisplay.textContent =
+  now.toLocaleTimeString([],options);
+
+  /* DATE */
+
+  dateDisplay.textContent =
+  now.toLocaleDateString([],{
+
+    weekday:'long',
+    year:'numeric',
+    month:'long',
+    day:'numeric'
+
+  });
+
+  /* CHECK ALARMS */
+
+  checkAlarms(now);
+
+  /* SYNC LOGO */
+
+  syncClockLogo(now);
+
 }
 
-function syncLogo(now){
-  const s=now.getSeconds(),m=now.getMinutes(),h=now.getHours()%12;
-  const sh=document.getElementById('logo-hour-hand');
-  const sm=document.getElementById('logo-minute-hand');
-  const ss=document.getElementById('logo-second-hand');
-  if(sh)sh.style.transform='rotate('+(h*30+m*0.5)+'deg)';
-  if(sm)sm.style.transform='rotate('+(m*6+s*0.1)+'deg)';
-  if(ss)ss.style.transform='rotate('+(s*6)+'deg)';
+setInterval(updateClock,1000);
+
+updateClock();
+
+/* =========================
+SYNC CLOCK LOGO
+========================= */
+
+function syncClockLogo(now){
+
+  const sec = now.getSeconds();
+  const min = now.getMinutes();
+  const hr = now.getHours()%12;
+
+  document
+  .getElementById("logoSecond")
+  .style.transform =
+  `rotate(${sec*6}deg)`;
+
+  document
+  .getElementById("logoMinute")
+  .style.transform =
+  `rotate(${min*6}deg)`;
+
+  document
+  .getElementById("logoHour")
+  .style.transform =
+  `rotate(${hr*30 + min*0.5}deg)`;
+
 }
 
-function updateWorldClocks(now){
-  const wc=document.getElementById('worldClocks');if(!wc)return;
-  wc.innerHTML=worldCities.map(c=>{
-    const t=now.toLocaleTimeString('en-US',{timeZone:c.tz,hour:'2-digit',minute:'2-digit',hour12:true});
-    const d=now.toLocaleDateString('en-US',{timeZone:c.tz,weekday:'short',month:'short',day:'2-digit'});
-    return`<div class="world-item"><div class="world-city">${c.flag} ${c.city}</div><div class="world-time">${t}</div><div class="world-date">${d}</div></div>`;
-  }).join('');
+/* =========================
+CREATE ALARM
+========================= */
+
+document
+.getElementById("createAlarmBtn")
+.addEventListener("click",createAlarm);
+
+function createAlarm(){
+
+  const time =
+  document.getElementById("alarmTime").value;
+
+  const label =
+  document.getElementById("alarmLabel").value.trim();
+
+  const sound =
+  document.getElementById("alarmSound").value;
+
+  const volume =
+  document.getElementById("alarmVolume").value;
+
+  const vibration =
+  document.getElementById("alarmVibration").checked;
+
+  const gradual =
+  document.getElementById("gradualVolume").checked;
+
+  /* VALIDATION */
+
+  if(!time){
+
+    alert("Please select time");
+    return;
+
+  }
+
+  /* DUPLICATE */
+
+  const exists = alarms.some(a=>a.time===time);
+
+  if(exists){
+
+    alert("Alarm already exists");
+    return;
+
+  }
+
+  const alarm = {
+
+    id:Date.now(),
+
+    time,
+
+    label:label || "Alarm",
+
+    sound,
+
+    volume,
+
+    vibration,
+
+    gradual,
+
+    enabled:true
+
+  };
+
+  alarms.push(alarm);
+
+  saveAlarms();
+
+  renderAlarms();
+
+  document.getElementById("alarmLabel").value="";
+
 }
 
-// ── Alarm ───────────────────────────────
+/* =========================
+SAVE ALARMS
+========================= */
+
+function saveAlarms(){
+
+  localStorage.setItem(
+    "neoAlarms",
+    JSON.stringify(alarms)
+  );
+
+}
+
+/* =========================
+RENDER ALARMS
+========================= */
+
+function renderAlarms(){
+
+  if(alarms.length===0){
+
+    alarmList.innerHTML=`
+
+      <div class="alarm-item">
+        No alarms created
+      </div>
+
+    `;
+
+    alarmCounter.textContent =
+    "0 ALARMS";
+
+    return;
+
+  }
+
+  alarmList.innerHTML="";
+
+  alarms.forEach(alarm=>{
+
+    const div =
+    document.createElement("div");
+
+    div.className="alarm-item";
+
+    div.innerHTML=`
+
+      <div class="alarm-top">
+
+        <div>
+
+          <div class="alarm-time">
+            ${alarm.time}
+          </div>
+
+          <div class="alarm-label">
+            ${alarm.label}
+          </div>
+
+        </div>
+
+        <div class="alarm-actions">
+
+          <button class="small-btn"
+                  onclick="toggleAlarm(${alarm.id})">
+
+            ${alarm.enabled ? "🔔":"🔕"}
+
+          </button>
+
+          <button class="small-btn"
+                  onclick="deleteAlarm(${alarm.id})">
+
+            🗑
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+    alarmList.appendChild(div);
+
+  });
+
+  alarmCounter.textContent =
+  `${alarms.length} ALARMS`;
+
+}
+
+renderAlarms();
+
+/* =========================
+DELETE ALARM
+========================= */
+
+function deleteAlarm(id){
+
+  alarms =
+  alarms.filter(a=>a.id!==id);
+
+  saveAlarms();
+
+  renderAlarms();
+
+}
+
+/* =========================
+TOGGLE ALARM
+========================= */
+
+function toggleAlarm(id){
+
+  alarms = alarms.map(alarm=>{
+
+    if(alarm.id===id){
+
+      alarm.enabled = !alarm.enabled;
+
+    }
+
+    return alarm;
+
+  });
+
+  saveAlarms();
+
+  renderAlarms();
+
+}
+
+/* =========================
+CHECK ALARMS
+========================= */
+
 function checkAlarms(now){
-  if(ringingId!==null)return;
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  if(now.getSeconds()!==0)return;
-  alarms.forEach(a=>{if(a.enabled&&a.time===h+':'+m)triggerAlarm(a.id);});
+
+  if(ringingAlarm) return;
+
+  const hours =
+  String(now.getHours()).padStart(2,"0");
+
+  const minutes =
+  String(now.getMinutes()).padStart(2,"0");
+
+  const currentTime =
+  `${hours}:${minutes}`;
+
+  if(now.getSeconds() !== 0) return;
+
+  alarms.forEach(alarm=>{
+
+    if(
+      alarm.enabled &&
+      alarm.time === currentTime
+    ){
+
+      triggerAlarm(alarm);
+
+    }
+
+  });
+
 }
 
-function triggerAlarm(id){
-  ringingId=id;snoozeCount=0;
-  const alarm=alarms.find(a=>a.id===id);
-  document.getElementById('clock').classList.add('alarm-on');
-  document.getElementById('ringOverlay').classList.add('show');
-  document.getElementById('ringingBanner').classList.add('show');
-  document.getElementById('ringingLabel').textContent=alarm?alarm.label:'ALARM';
-  document.getElementById('snoozeCount').textContent='Snooze: '+(alarm?alarm.snoozeLimit||3:3)+'x';
-  if(alarm&&alarm.vibration&&navigator.vibrate)navigator.vibrate([500,200,500,200,500]);
-  startAlarmSound(alarm);renderAlarms();
+/* =========================
+TRIGGER ALARM
+========================= */
+
+function triggerAlarm(alarm){
+
+  ringingAlarm = alarm;
+
+  document
+  .getElementById("ringBox")
+  .classList.remove("hidden");
+
+  document
+  .getElementById("ringOverlay")
+  .classList.add("show");
+
+  document
+  .getElementById("ringAlarmLabel")
+  .textContent = alarm.label;
+
+  playAlarmSound(alarm);
+
+  if(
+    alarm.vibration &&
+    navigator.vibrate
+  ){
+
+    navigator.vibrate([
+      500,
+      300,
+      500,
+      300,
+      500
+    ]);
+
+  }
+
 }
+
+/* =========================
+PLAY SOUND
+========================= */
+
+function playAlarmSound(alarm){
+
+  let soundPath = "";
+
+  switch(alarm.sound){
+
+    case "beep":
+      soundPath="sounds/beep.mp3";
+      break;
+
+    case "bell":
+      soundPath="sounds/bell.mp3";
+      break;
+
+    case "alarm":
+      soundPath="sounds/alarm.mp3";
+      break;
+
+    case "soft":
+      soundPath="sounds/soft.mp3";
+      break;
+
+    default:
+      soundPath="sounds/beep.mp3";
+
+  }
+
+  alarmAudio.src = soundPath;
+
+  alarmAudio.loop = true;
+
+  alarmAudio.volume =
+  alarm.volume / 100;
+
+  alarmAudio.play();
+
+}
+
+/* =========================
+STOP ALARM
+========================= */
+
+document
+.getElementById("stopAlarmBtn")
+.addEventListener("click",stopAlarm);
 
 function stopAlarm(){
-  ringingId=null;snoozeCount=0;
-  document.getElementById('clock').classList.remove('alarm-on');
-  document.getElementById('ringOverlay').classList.remove('show');
-  document.getElementById('ringingBanner').classList.remove('show');
-  stopAlarmSound();renderAlarms();
+
+  ringingAlarm = null;
+
+  alarmAudio.pause();
+
+  alarmAudio.currentTime = 0;
+
+  document
+  .getElementById("ringBox")
+  .classList.add("hidden");
+
+  document
+  .getElementById("ringOverlay")
+  .classList.remove("show");
+
+  if(navigator.vibrate){
+
+    navigator.vibrate(0);
+
+  }
+
 }
 
-function snooze(mins){
-  const alarm=ala
+/* =========================
+SNOOZE
+========================= */
+
+document
+.getElementById("snooze5Btn")
+.addEventListener("click",()=>{
+
+  snoozeAlarm(5);
+
+});
+
+document
+.getElementById("snooze10Btn")
+.addEventListener("click",()=>{
+
+  snoozeAlarm(10);
+
+});
+
+function snoozeAlarm(minutes){
+
+  if(!ringingAlarm) return;
+
+  const now = new Date();
+
+  now.setMinutes(
+    now.getMinutes() + minutes
+  );
+
+  const hrs =
+  String(now.getHours()).padStart(2,"0");
+
+  const mins =
+  String(now.getMinutes()).padStart(2,"0");
+
+  ringingAlarm.time =
+  `${hrs}:${mins}`;
+
+  saveAlarms();
+
+  renderAlarms();
+
+  stopAlarm();
+
+}
+
+/* =========================
+TIMER
+========================= */
+
+const timerDisplay =
+document.getElementById("timerDisplay");
+
+document
+.getElementById("startTimerBtn")
+.addEventListener("click",startTimer);
+
+document
+.getElementById("pauseTimerBtn")
+.addEventListener("click",pauseTimer);
+
+document
+.getElementById("resetTimerBtn")
+.addEventListener("click",resetTimer);
+
+function startTimer(){
+
+  if(timerRunning) return;
+
+  if(timerSeconds<=0){
+
+    const hrs =
+    Number(document.getElementById("timerHours").value)||0;
+
+    const mins =
+    Number(document.getElementById("timerMinutes").value)||0;
+
+    const secs =
+    Number(document.getElementById("timerSeconds").value)||0;
+
+    timerSeconds =
+    (hrs*3600)+(mins*60)+secs;
+
+  }
+
+  if(timerSeconds<=0){
+
+    alert("Enter valid time");
+    return;
+
+  }
+
+  timerRunning = true;
+
+  timerInterval = setInterval(()=>{
+
+    timerSeconds--;
+
+    updateTimerDisplay();
+
+    if(timerSeconds<=0){
+
+      clearInterval(timerInterval);
+
+      timerRunning=false;
+
+      timerFinished();
+
+    }
+
+  },1000);
+
+}
+
+function pauseTimer(){
+
+  timerRunning=false;
+
+  clearInterval(timerInterval);
+
+}
+
+function resetTimer(){
+
+  timerRunning=false;
+
+  clearInterval(timerInterval);
+
+  timerSeconds=0;
+
+  updateTimerDisplay();
+
+}
+
+function updateTimerDisplay(){
+
+  const hrs =
+  Math.floor(timerSeconds/3600);
+
+  const mins =
+  Math.floor((timerSeconds%3600)/60);
+
+  const secs =
+  timerSeconds%60;
+
+  timerDisplay.textContent =
+
+  `${String(hrs).padStart(2,"0")}:`+
+  `${String(mins).padStart(2,"0")}:`+
+  `${String(secs).padStart(2,"0")}`;
+
+}
+
+function timerFinished(){
+
+  alarmAudio.src="sounds/alarm.mp3";
+
+  alarmAudio.loop=true;
+
+  alarmAudio.play();
+
+  alert("Time's Up!");
+
+}
+
+/* =========================
+STOPWATCH
+========================= */
+
+const stopwatchDisplay =
+document.getElementById("stopwatchDisplay");
+
+document
+.getElementById("startStopwatchBtn")
+.addEventListener("click",toggleStopwatch);
+
+document
+.getElementById("lapBtn")
+.addEventListener("click",lapStopwatch);
+
+document
+.getElementById("resetStopwatchBtn")
+.addEventListener("click",resetStopwatch);
+
+function toggleStopwatch(){
+
+  if(stopwatchRunning){
+
+    clearInterval(stopwatchInterval);
+
+    stopwatchRunning=false;
+
+    document
+    .getElementById("startStopwatchBtn")
+    .textContent="▶ START";
+
+    return;
+
+  }
+
+  stopwatchRunning=true;
+
+  document
+  .getElementById("startStopwatchBtn")
+  .textContent="⏸ STOP";
+
+  stopwatchInterval=setInterval(()=>{
+
+    stopwatchTime += 100;
+
+    updateStopwatch();
+
+  },100);
+
+}
+
+function updateStopwatch(){
+
+  const total =
+  stopwatchTime;
+
+  const hrs =
+  Math.floor(total/3600000);
+
+  const mins =
+  Math.floor((total%3600000)/60000);
+
+  const secs =
+  Math.floor((total%60000)/1000);
+
+  const ms =
+  Math.floor((total%1000)/100);
+
+  stopwatchDisplay.textContent=
+
+  `${String(hrs).padStart(2,"0")}:`+
+  `${String(mins).padStart(2,"0")}:`+
+  `${String(secs).padStart(2,"0")}.`+
+  `${ms}`;
+
+}
+
+function lapStopwatch(){
+
+  if(!stopwatchRunning) return;
+
+  lapCount++;
+
+  const lap =
+  document.createElement("div");
+
+  lap.className="lap-item";
+
+  lap.innerHTML=`
+
+    <span>
+      LAP ${lapCount}
+    </span>
+
+    <span>
+      ${stopwatchDisplay.textContent}
+    </span>
+
+  `;
+
+  document
+  .getElementById("lapList")
+  .prepend(lap);
+
+}
+
+function resetStopwatch(){
+
+  clearInterval(stopwatchInterval);
+
+  stopwatchRunning=false;
+
+  stopwatchTime=0;
+
+  lapCount=0;
+
+  stopwatchDisplay.textContent=
+  "00:00:00.0";
+
+  document
+  .getElementById("lapList")
+  .innerHTML="";
+
+  document
+  .getElementById("startStopwatchBtn")
+  .textContent="▶ START";
+
+}
+
+/* =========================
+WORLD CLOCK
+========================= */
+
+const worldCities = [
+
+  {
+    city:"🇮🇳 India",
+    zone:"Asia/Kolkata"
+  },
+
+  {
+    city:"🇺🇸 New York",
+    zone:"America/New_York"
+  },
+
+  {
+    city:"🇬🇧 London",
+    zone:"Europe/London"
+  },
+
+  {
+    city:"🇯🇵 Tokyo",
+    zone:"Asia/Tokyo"
+  },
+
+  {
+    city:"🇦🇪 Dubai",
+    zone:"Asia/Dubai"
+  },
+
+  {
+    city:"🇨🇦 Toronto",
+    zone:"America/Toronto"
+  }
+
+];
+
+function renderWorldClocks(){
+
+  const grid =
+  document.getElementById("worldGrid");
+
+  grid.innerHTML="";
+
+  worldCities.forEach(city=>{
+
+    const now = new Date();
+
+    const time =
+    now.toLocaleTimeString([],{
+
+      timeZone:city.zone,
+
+      hour:'2-digit',
+      minute:'2-digit'
+
+    });
+
+    const div =
+    document.createElement("div");
+
+    div.className="world-card";
+
+    div.innerHTML=`
+
+      <div class="world-city">
+        ${city.city}
+      </div>
+
+      <div class="world-time">
+        ${time}
+      </div>
+
+    `;
+
+    grid.appendChild(div);
+
+  });
+
+}
+
+setInterval(renderWorldClocks,1000);
+
+renderWorldClocks();
+
+/* =========================
+THEMES
+========================= */
+
+document
+.getElementById("themeSelect")
+.addEventListener("change",e=>{
+
+  applyTheme(e.target.value);
+
+});
+
+function applyTheme(theme){
+
+  currentTheme = theme;
+
+  localStorage.setItem(
+    "neoTheme",
+    theme
+  );
+
+  const root =
+  document.documentElement;
+
+  switch(theme){
+
+    case "matrix":
+
+      root.style.setProperty("--bg","#03110a");
+      root.style.setProperty("--panel","#071a10");
+      root.style.setProperty("--border","#104d2b");
+      root.style.setProperty("--cyan","#00ff88");
+      break;
+
+    case "purple":
+
+      root.style.setProperty("--bg","#120717");
+      root.style.setProperty("--panel","#1b0d25");
+      root.style.setProperty("--border","#53256f");
+      root.style.setProperty("--cyan","#d66bff");
+      break;
+
+    case "sunset":
+
+      root.style.setProperty("--bg","#160c08");
+      root.style.setProperty("--panel","#24120d");
+      root.style.setProperty("--border","#7d3b1e");
+      root.style.setProperty("--cyan","#ff944d");
+      break;
+
+    case "light":
+
+      root.style.setProperty("--bg","#eef4fa");
+      root.style.setProperty("--panel","#ffffff");
+      root.style.setProperty("--border","#bfd3e6");
+      root.style.setProperty("--cyan","#0077ff");
+      root.style.setProperty("--text","#102030");
+      break;
+
+    default:
+
+      root.style.setProperty("--bg","#071018");
+      root.style.setProperty("--panel","#0d1722");
+      root.style.setProperty("--border","#17344f");
+      root.style.setProperty("--cyan","#00d9ff");
+      root.style.setProperty("--text","#d9f3ff");
+
+  }
+
+}
+
+applyTheme(currentTheme);
+
+/* =========================
+24 HOUR FORMAT
+========================= */
+
+document
+.getElementById("format24")
+.checked = use24Hour;
+
+document
+.getElementById("format24")
+.addEventListener("change",e=>{
+
+  use24Hour=e.target.checked;
+
+  localStorage.setItem(
+    "neo24h",
+    use24Hour
+  );
+
+});
+
+/* =========================
+CLEAR ALL
+========================= */
+
+document
+.getElementById("clearAllBtn")
+.addEventListener("click",()=>{
+
+  const ok =
+  confirm("Delete all alarms?");
+
+  if(!ok) return;
+
+  alarms=[];
+
+  saveAlarms();
+
+  renderAlarms();
+
+});
+
+/* =========================
+VOLUME TEXT
+========================= */
+
+document
+.getElementById("alarmVolume")
+.addEventListener("input",e=>{
+
+  document
+  .getElementById("volumeText")
+  .textContent=
+  e.target.value + "%";
+
+});
+
+/* =========================
+SAFE AUDIO
+========================= */
+
+document.body.addEventListener(
+  "click",
+  ()=>{
+
+    alarmAudio.play()
+    .then(()=>{
+
+      alarmAudio.pause();
+      alarmAudio.currentTime=0;
+
+    })
+    .catch(()=>{});
+
+  },
+
+  {once:true}
+
+);
+
+/* =========================================
+END
+========================================= */
+      <script>
+// ───────── SOUND ENGINE ─────────
+let currentAudio=null;
+
+function startAlarmSound(alarm){
+  stopAlarmSound();
+
+  let src='';
+
+  if(alarm.sound==='custom' && alarm.customSound){
+    src=alarm.customSound;
+  }else{
+    src=soundFiles[alarm.sound] || soundFiles.rooster;
+  }
+
+  currentAudio=new Audio(src);
+
+  currentAudio.loop=true;
+
+  let volume=(alarm.volume || 80)/100;
+
+  if(alarm.gradual){
+    currentAudio.volume=0.05;
+
+    let grow=setInterval(()=>{
+      if(!currentAudio)return clearInterval(grow);
+
+      if(currentAudio.volume<volume){
+        currentAudio.volume=Math.min(
+          currentAudio.volume+0.05,
+          volume
+        );
+      }else{
+        clearInterval(grow);
+      }
+    },800);
+
+  }else{
+    currentAudio.volume=volume;
+  }
+
+  currentAudio.play().catch(()=>{});
+}
+
+function stopAlarmSound(){
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime=0;
+    currentAudio=null;
+  }
+
+  if(navigator.vibrate){
+    navigator.vibrate(0);
+  }
+}
+
+// ───────── CUSTOM SOUND ─────────
+function handleCustomSound(input){
+  const file=input.files[0];
+
+  if(!file)return;
+
+  customSoundURL=URL.createObjectURL(file);
+
+  document.getElementById('customSoundName').textContent=file.name;
+
+  selectedSound='custom';
+
+  document.querySelectorAll('.sound-btn')
+    .forEach(btn=>btn.classList.remove('selected'));
+
+  document.querySelector('[data-sound="custom"]')
+    .classList.add('selected');
+}
+
+// ───────── TIMER ─────────
+function startTimer(){
+
+  if(!timerRunning){
+
+    if(timerRemaining<=0){
+
+      const h=parseInt(document.getElementById('timerH').value)||0;
+      const m=parseInt(document.getElementById('timerM').value)||0;
+      const s=parseInt(document.getElementById('timerS').value)||0;
+
+      timerRemaining=(h*3600)+(m*60)+s;
+
+      if(timerRemaining<=0)return;
+    }
+
+    timerRunning=true;
+
+    timerInterval=setInterval(()=>{
+
+      timerRemaining--;
+
+      updateTimerDisplay();
+
+      if(timerRemaining<=0){
+
+        clearInterval(timerInterval);
+
+        timerRunning=false;
+
+        document.getElementById('timerFinish').style.display='block';
+
+        currentAudio=new Audio(soundFiles.bell);
+        currentAudio.loop=true;
+        currentAudio.play().catch(()=>{});
+      }
+
+    },1000);
+  }
+}
+
+function updateTimerDisplay(){
+
+  const h=Math.floor(timerRemaining/3600);
+  const m=Math.floor((timerRemaining%3600)/60);
+  const s=timerRemaining%60;
+
+  document.getElementById('timerDisplay').textContent=
+    String(h).padStart(2,'0')+':'+
+    String(m).padStart(2,'0')+':'+
+    String(s).padStart(2,'0');
+}
+
+function pauseTimer(){
+  timerRunning=false;
+  clearInterval(timerInterval);
+}
+
+function resetTimer(){
+  pauseTimer();
+
+  timerRemaining=0;
+
+  updateTimerDisplay();
+
+  document.getElementById('timerFinish').style.display='none';
+}
+
+function stopTimerAlarm(){
+  stopAlarmSound();
+
+  document.getElementById('timerFinish').style.display='none';
+}
+
+// ───────── STOPWATCH ─────────
+function startSW(){
+
+  if(swRunning){
+
+    clearInterval(swInterval);
+
+    swRunning=false;
+
+    document.getElementById('swStartBtn').textContent='▶ START';
+
+  }else{
+
+    swRunning=true;
+
+    document.getElementById('swStartBtn').textContent='⏹ STOP';
+
+    const start=Date.now()-swElapsed;
+
+    swInterval=setInterval(()=>{
+
+      swElapsed=Date.now()-start;
+
+      updateSWDisplay();
+
+    },100);
+  }
+}
+
+function updateSWDisplay(){
+
+  const ms=Math.floor((swElapsed%1000)/100);
+  const sec=Math.floor(swElapsed/1000)%60;
+  const min=Math.floor(swElapsed/60000)%60;
+  const hr=Math.floor(swElapsed/3600000);
+
+  document.getElementById('swDisplay').textContent=
+    String(hr).padStart(2,'0')+':'+
+    String(min).padStart(2,'0')+':'+
+    String(sec).padStart(2,'0')+'.'+ms;
+}
+
+function lapSW(){
+
+  if(!swRunning)return;
+
+  const lapTime=swElapsed-swLapTime;
+
+  swLapTime=swElapsed;
+
+  laps.unshift({
+    total:formatSW(swElapsed),
+    split:formatSW(lapTime)
+  });
+
+  renderLaps();
+}
+
+function renderLaps(){
+
+  document.getElementById('lapList').innerHTML=
+    laps.map((lap,i)=>`
+      <div class="lap-item">
+        <div class="lap-num">#${laps.length-i}</div>
+        <div class="lap-time">${lap.total}</div>
+        <div class="lap-split">+${lap.split}</div>
+      </div>
+    `).join('');
+}
+
+function resetSW(){
+
+  clearInterval(swInterval);
+
+  swRunning=false;
+
+  swElapsed=0;
+
+  swLapTime=0;
+
+  laps=[];
+
+  updateSWDisplay();
+
+  renderLaps();
+
+  document.getElementById('swStartBtn').textContent='▶ START';
+}
+
+function formatSW(ms){
+
+  const sec=Math.floor(ms/1000)%60;
+  const min=Math.floor(ms/60000)%60;
+  const hr=Math.floor(ms/3600000);
+
+  return (
+    String(hr).padStart(2,'0')+':'+
+    String(min).padStart(2,'0')+':'+
+    String(sec).padStart(2,'0')
+  );
+}
+
+// ───────── SETTINGS ─────────
+function saveSettings(){
+
+  settings.homeTz=document.getElementById('homeTz').value;
+
+  settings.use24h=document.getElementById('use24h').checked;
+
+  localStorage.setItem(
+    'settings',
+    JSON.stringify(settings)
+  );
+}
+
+// ───────── CLEAR ALL ─────────
+function clearAllAlarms(){
+
+  if(confirm('Delete all alarms?')){
+
+    alarms=[];
+
+    localStorage.setItem('alarms','[]');
+
+    renderAlarms();
+  }
+}
+
+// ───────── INIT ─────────
+function init(){
+
+  document.getElementById('homeTz').value=settings.homeTz;
+
+  document.getElementById('use24h').checked=settings.use24h;
+
+  renderThemes();
+
+  renderLangs();
+
+  applyTheme(settings.theme || 'cyber');
+
+  applyLang(settings.lang || 'en');
+
+  renderAlarms();
+
+  updateClock();
+
+  setInterval(updateClock,1000);
+}
+
+init();
+</script>
+</body>
+    </html>
+      
