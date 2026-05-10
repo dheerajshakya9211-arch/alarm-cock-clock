@@ -5,582 +5,242 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Neo Alarm Clock</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<script src="capacitor.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#060a0f;--panel:#0d1520;--border:#1a3a5c;--glow:#00d4ff;--glow2:#ff6b35;--red:#ff3b3b;--green:#00ff9d;--text:#cde8ff;--dim:#3a6080}
 body{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;font-family:'Share Tech Mono',monospace;color:var(--text);overflow-x:hidden;padding:10px}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 .container{display:flex;flex-direction:column;align-items:center;gap:12px;z-index:10;width:100%;max-width:520px}
-.brand{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.brand{display:flex;flex-direction:column;align-items:center;gap:6px}
 .brand-row{display:flex;align-items:center;gap:12px}
-.brand h1{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,5vw,1.6rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow);animation:titlePulse 3s ease-in-out infinite}
-@keyframes titlePulse{0%,100%{text-shadow:0 0 20px var(--glow)}50%{text-shadow:0 0 40px var(--glow)}}
-.logo-clock{width:48px;height:48px;filter:drop-shadow(0 0 10px rgba(0,212,255,0.7));flex-shrink:0}
-#logo-hour-hand,#logo-minute-hand,#logo-second-hand{transform-origin:27px 27px}
-
-/* NAV - Bigger tabs */
+.brand h1{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,5vw,1.6rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow);animation:tp 3s ease-in-out infinite}
+@keyframes tp{0%,100%{text-shadow:0 0 20px var(--glow)}50%{text-shadow:0 0 40px var(--glow)}}
+.logo-clock{width:48px;height:48px;filter:drop-shadow(0 0 10px rgba(0,212,255,.7));flex-shrink:0}
 .nav-tabs{display:flex;gap:4px;width:100%;flex-wrap:wrap}
-.nav-tab{flex:1;min-width:55px;font-family:'Orbitron',sans-serif;font-size:0.55rem;letter-spacing:0.08em;padding:10px 2px;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;line-height:1.3}
-.nav-tab.active{background:rgba(0,212,255,0.15);border-color:var(--glow);color:var(--glow);box-shadow:0 0 8px rgba(0,212,255,0.2)}
-
-.page{display:none;width:100%;flex-direction:column;gap:12px}
-.page.active{display:flex}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;width:100%;position:relative;box-shadow:0 0 10px rgba(0,0,0,0.4)}
+.nav-tab{flex:1;min-width:52px;font-family:'Orbitron',sans-serif;font-size:.52rem;letter-spacing:.08em;padding:10px 2px;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all .2s;line-height:1.3}
+.nav-tab.active{background:rgba(0,212,255,.15);border-color:var(--glow);color:var(--glow);box-shadow:0 0 8px rgba(0,212,255,.2)}
+.page{display:none;width:100%;flex-direction:column;gap:12px}.page.active{display:flex}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;width:100%;position:relative;box-shadow:0 0 10px rgba(0,0,0,.4)}
 .panel::before{content:'';position:absolute;top:6px;left:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-right:none;border-bottom:none}
 .panel::after{content:'';position:absolute;bottom:6px;right:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-left:none;border-top:none}
-.sec-label{font-size:0.55rem;letter-spacing:0.4em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* Clock - Big & Clear */
-#clock{font-family:'Orbitron',sans-serif;font-size:clamp(3rem,14vw,5.5rem);font-weight:700;color:var(--glow);text-shadow:0 0 30px var(--glow);letter-spacing:0.05em;line-height:1;text-align:center;margin-bottom:8px}
-#clock.alarm-on{animation:alarmFlash 0.5s ease-in-out infinite}
-@keyframes alarmFlash{0%,100%{color:var(--glow)}50%{color:var(--red);text-shadow:0 0 40px var(--red)}}
-
-/* Date - Separate Lines */
+.sl{font-size:.55rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+#clock{font-family:'Orbitron',sans-serif;font-size:clamp(3rem,14vw,5.5rem);font-weight:700;color:var(--glow);text-shadow:0 0 30px var(--glow);letter-spacing:.05em;line-height:1;text-align:center;margin-bottom:8px}
+#clock.alarm-on{animation:af .5s ease-in-out infinite}
+@keyframes af{0%,100%{color:var(--glow)}50%{color:var(--red);text-shadow:0 0 40px var(--red)}}
 .date-container{text-align:center;margin-top:4px}
-#dayName{font-size:0.8rem;color:var(--glow2);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:2px}
-#dateNum{font-family:'Orbitron',sans-serif;font-size:1.4rem;color:var(--text);letter-spacing:0.1em}
-#monthYear{font-size:0.7rem;color:var(--dim);letter-spacing:0.3em;margin-top:2px}
-
+#dayName{font-size:.8rem;color:var(--glow2);letter-spacing:.3em;text-transform:uppercase;margin-bottom:2px}
+#dateNum{font-family:'Orbitron',sans-serif;font-size:1.4rem;color:var(--text);letter-spacing:.1em}
+#monthYear{font-size:.7rem;color:var(--dim);letter-spacing:.3em;margin-top:2px}
 .world-clocks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.world-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:8px 10px}
-.world-city{font-size:0.6rem;color:var(--dim);letter-spacing:0.2em;margin-bottom:2px}
+.world-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:8px 10px;cursor:pointer;transition:all .2s}
+.world-item:hover{border-color:var(--glow);background:rgba(0,212,255,.05)}
+.world-item.is-home{border-color:var(--glow2);box-shadow:0 0 8px rgba(255,107,53,.2)}
+.world-city{font-size:.6rem;color:var(--dim);letter-spacing:.2em;margin-bottom:2px}
 .world-time{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--glow)}
-.world-date{font-size:0.55rem;color:var(--dim)}
-input[type=time],input[type=text],input[type=number],select{background:#070f1a;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:9px 10px;border-radius:3px;outline:none;width:100%;transition:border-color 0.2s}
+.world-date{font-size:.55rem;color:var(--dim)}
+.world-item .set-tz{font-size:.5rem;color:var(--dim);margin-top:3px;display:block;letter-spacing:.1em}
+.world-item.is-home .set-tz{color:var(--glow2)}
+input[type=time],input[type=text],input[type=number],select{background:#070f1a;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.85rem;padding:9px 10px;border-radius:3px;outline:none;width:100%;transition:border-color .2s}
 input[type=time]{color:var(--glow);font-family:'Orbitron',sans-serif;font-size:1rem}
 input:focus,select:focus{border-color:var(--glow)}
 select option{background:#0d1520}
-.row{display:flex;gap:8px}
-.row>*{flex:1}
+.row{display:flex;gap:8px}.row>*{flex:1}
 .sound-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-.sound-btn{background:#070f1a;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:8px 4px;border-radius:3px;cursor:pointer;text-align:center;transition:all 0.2s}
-.sound-btn.selected{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
+.sound-btn{background:#070f1a;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:8px 4px;border-radius:3px;cursor:pointer;text-align:center;transition:all .2s}
+.sound-btn.selected{background:rgba(0,212,255,.12);border-color:var(--glow);color:var(--glow)}
 .range-row{display:flex;align-items:center;gap:10px;margin:6px 0}
-.range-row label{font-size:0.6rem;color:var(--dim);width:80px;flex-shrink:0}
+.range-row label{font-size:.6rem;color:var(--dim);width:80px;flex-shrink:0}
 input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
-.range-val{font-size:0.7rem;color:var(--glow);width:36px;text-align:right}
+.range-val{font-size:.7rem;color:var(--glow);width:36px;text-align:right}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
 .toggle-row:last-child{border-bottom:none}
-.toggle-row label{font-size:0.68rem;color:var(--text)}
-.toggle-row span{font-size:0.58rem;color:var(--dim);display:block}
+.toggle-row label{font-size:.68rem;color:var(--text)}
+.toggle-row span{font-size:.58rem;color:var(--dim);display:block}
 .toggle{position:relative;width:40px;height:20px;flex-shrink:0}
 .toggle input{display:none}
-.toggle-track{position:absolute;inset:0;background:#0a1825;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s}
-.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--dim);border-radius:50%;transition:all 0.3s}
-.toggle input:checked+.toggle-track{background:rgba(0,212,255,0.15);border-color:var(--glow)}
+.toggle-track{position:absolute;inset:0;background:#0a1825;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .3s}
+.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--dim);border-radius:50%;transition:all .3s}
+.toggle input:checked+.toggle-track{background:rgba(0,212,255,.15);border-color:var(--glow)}
 .toggle input:checked+.toggle-track::after{transform:translateX(20px);background:var(--glow);box-shadow:0 0 8px var(--glow)}
-.btn{font-family:'Orbitron',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;padding:12px 14px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all 0.2s}
-.btn-primary{background:var(--glow);color:#000;box-shadow:0 0 16px rgba(0,212,255,0.3)}
+.btn{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.12em;padding:12px 14px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+.btn-primary{background:var(--glow);color:#000;box-shadow:0 0 16px rgba(0,212,255,.3)}
 .btn-secondary{background:transparent;border:1px solid var(--glow);color:var(--glow)}
-.btn-danger{background:var(--red);color:#fff;animation:btnPulse 0.5s ease-in-out infinite}
-@keyframes btnPulse{0%,100%{box-shadow:0 0 16px rgba(255,59,59,0.4)}50%{box-shadow:0 0 32px rgba(255,59,59,0.8)}}
-.btn-snooze{background:rgba(255,107,53,0.2);color:var(--glow2);border:1px solid var(--glow2);font-family:'Orbitron',sans-serif;font-size:0.6rem;padding:9px 12px;border-radius:3px;cursor:pointer;white-space:nowrap}
-.alarm-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;margin-top:10px}
+.btn-danger{background:var(--red);color:#fff;animation:bp .5s ease-in-out infinite}
+@keyframes bp{0%,100%{box-shadow:0 0 16px rgba(255,59,59,.4)}50%{box-shadow:0 0 32px rgba(255,59,59,.8)}}
+.btn-snooze{background:rgba(255,107,53,.2);color:var(--glow2);border:1px solid var(--glow2);font-family:'Orbitron',sans-serif;font-size:.6rem;padding:9px 12px;border-radius:3px;cursor:pointer;white-space:nowrap}
+.alarm-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;margin-top:10px}
 .alarm-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px 12px}
-.alarm-item.ringing{border-color:var(--red);animation:itemFlash 0.5s ease-in-out infinite}
-@keyframes itemFlash{0%,100%{background:rgba(255,59,59,0.06)}50%{background:rgba(255,59,59,0.18)}}
+.alarm-item.ringing{border-color:var(--red);animation:ifl .5s ease-in-out infinite}
+@keyframes ifl{0%,100%{background:rgba(255,59,59,.06)}50%{background:rgba(255,59,59,.18)}}
 .alarm-top{display:flex;align-items:center;justify-content:space-between}
 .alarm-time-txt{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--glow)}
 .alarm-item.ringing .alarm-time-txt{color:var(--red)}
 .alarm-actions{display:flex;align-items:center;gap:8px}
 .alarm-bottom{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
-.badge{font-size:0.55rem;padding:2px 7px;border-radius:2px;border:1px solid}
+.badge{font-size:.55rem;padding:2px 7px;border-radius:2px;border:1px solid}
 .badge-label{color:var(--dim);border-color:var(--border)}
-.badge-sound{color:var(--glow2);border-color:rgba(255,107,53,0.3)}
-.badge-info{color:var(--green);border-color:rgba(0,255,157,0.3)}
-.btn-del{background:transparent;border:1px solid #2a1a1a;color:#553333;font-size:0.8rem;width:26px;height:26px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.badge-sound{color:var(--glow2);border-color:rgba(255,107,53,.3)}
+.badge-info{color:var(--green);border-color:rgba(0,255,157,.3)}
+.btn-del{background:transparent;border:1px solid #2a1a1a;color:#553333;font-size:.8rem;width:26px;height:26px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .btn-del:hover{border-color:var(--red);color:var(--red)}
-.no-alarms{text-align:center;color:var(--dim);font-size:0.65rem;padding:20px}
+.no-alarms{text-align:center;color:var(--dim);font-size:.65rem;padding:20px}
 .ring-overlay{display:none;position:fixed;inset:0;z-index:200;pointer-events:none}
-.ring-overlay.show{display:block;animation:ringOverlay 0.5s ease-in-out infinite}
-@keyframes ringOverlay{0%,100%{background:rgba(255,59,59,0.03)}50%{background:rgba(255,59,59,0.12)}}
-.ringing-banner{display:none;background:rgba(255,59,59,0.12);border:1px solid var(--red);border-radius:4px;padding:14px;text-align:center;width:100%}
+.ring-overlay.show{display:block;animation:ro .5s ease-in-out infinite}
+@keyframes ro{0%,100%{background:rgba(255,59,59,.03)}50%{background:rgba(255,59,59,.12)}}
+.ringing-banner{display:none;background:rgba(255,59,59,.12);border:1px solid var(--red);border-radius:4px;padding:14px;text-align:center;width:100%}
 .ringing-banner.show{display:block}
-.ringing-title{font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);margin-bottom:4px;animation:alarmFlash 0.5s ease-in-out infinite}
-.ringing-label{font-size:0.75rem;color:var(--text);margin-bottom:12px;font-weight:bold}
+.ringing-title{font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--red);margin-bottom:4px;animation:af .5s ease-in-out infinite}
+.ringing-label{font-size:.75rem;color:var(--text);margin-bottom:12px;font-weight:bold}
 .snooze-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.stopwatch-display,.timer-display{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,10vw,3.5rem);font-weight:700;color:var(--glow);text-align:center;text-shadow:0 0 20px var(--glow);letter-spacing:0.05em}
+.stopwatch-display,.timer-display{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,10vw,3.5rem);font-weight:700;color:var(--glow);text-align:center;text-shadow:0 0 20px var(--glow);letter-spacing:.05em}
 .lap-list{max-height:160px;overflow-y:auto;margin-top:10px;display:flex;flex-direction:column;gap:4px}
-.lap-item{display:flex;justify-content:space-between;font-size:0.65rem;padding:5px 8px;background:#070f1a;border:1px solid var(--border);border-radius:3px}
-.lap-num{color:var(--dim)}
-.lap-time{color:var(--glow);font-family:'Orbitron',sans-serif}
-.lap-split{color:var(--glow2)}
+.lap-item{display:flex;justify-content:space-between;font-size:.65rem;padding:5px 8px;background:#070f1a;border:1px solid var(--border);border-radius:3px}
+.lap-num{color:var(--dim)}.lap-time{color:var(--glow);font-family:'Orbitron',sans-serif}.lap-split{color:var(--glow2)}
 .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
-.theme-card{border:2px solid transparent;border-radius:6px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s}
-.theme-card.active{border-color:var(--glow);box-shadow:0 0 12px rgba(0,212,255,0.3)}
+.theme-card{border:2px solid transparent;border-radius:6px;padding:10px;cursor:pointer;text-align:center;transition:all .2s}
+.theme-card.active{border-color:var(--glow);box-shadow:0 0 12px rgba(0,212,255,.3)}
 .theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 6px}
 .lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.lang-card{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s;font-size:0.68rem;color:var(--dim)}
-.lang-card.active{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
+.lang-card{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;text-align:center;transition:all .2s;font-size:.62rem;color:var(--dim);-webkit-tap-highlight-color:rgba(0,212,255,.2)}
 .lang-card:hover{border-color:var(--glow);color:var(--glow)}
-.status-bar{display:flex;justify-content:space-between;width:100%;font-size:0.55rem;color:var(--dim);letter-spacing:0.15em;padding:0 2px}
-.status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite;margin-right:5px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.settings-row{padding:10px 0;border-bottom:1px solid var(--border)}
-.settings-row:last-child{border-bottom:none}
-.settings-row>label{font-size:0.65rem;color:var(--text);display:block;margin-bottom:6px}
-.settings-row span{font-size:0.58rem;color:var(--dim)}
-.upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;text-align:center;transition:all 0.2s}
+.lang-card.active{background:rgba(0,212,255,.15);border-color:var(--glow);color:var(--glow);box-shadow:0 0 6px rgba(0,212,255,.2)}
+.lang-card .ck{display:none;color:var(--green);font-size:.7rem;margin-top:2px}
+.lang-card.active .ck{display:block}
+.status-bar{display:flex;justify-content:space-between;width:100%;font-size:.55rem;color:var(--dim);letter-spacing:.15em;padding:0 2px}
+.status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:bk 2s ease-in-out infinite;margin-right:5px}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.settings-row{padding:10px 0;border-bottom:1px solid var(--border)}.settings-row:last-child{border-bottom:none}
+.settings-row>label{font-size:.65rem;color:var(--text);display:block;margin-bottom:6px}
+.upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem;text-align:center;transition:all .2s}
 .upload-btn:hover{border-color:var(--glow);color:var(--glow)}
-.custom-sound-name{font-size:0.65rem;color:var(--green);margin-top:6px;text-align:center}
-                 </style>
-                 </head>
+.custom-sound-name{font-size:.65rem;color:var(--green);margin-top:6px;text-align:center}
+.modal-bg{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--glow);border-radius:8px;padding:24px;max-width:300px;width:90%;text-align:center}
+.modal-box h3{font-family:'Orbitron',sans-serif;font-size:.8rem;color:var(--glow);margin-bottom:16px}
+.modal-box input{margin-bottom:12px}
+.modal-btns{display:flex;gap:8px;justify-content:center}
+.sound-status{font-size:.55rem;color:var(--green);margin-top:2px;min-height:14px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--glow);color:var(--glow);font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:10px 20px;border-radius:4px;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
 <body>
 <div class="ring-overlay" id="ringOverlay"></div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="snoozeModal">
+  <div class="modal-box">
+    <h3 id="modalTitle">CUSTOM SNOOZE</h3>
+    <input type="number" id="snoozeCustomMin" placeholder="Minutes (1-60)" min="1" max="60" style="text-align:center">
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="snoozeFromModal()">OK</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('snoozeModal').classList.remove('show')" id="modalCancel">CANCEL</button>
+    </div>
+  </div>
+</div>
 <div class="container">
-
-<div class="brand">
-  <div class="brand-row">
-    <svg class="logo-clock" viewBox="0 0 54 54" fill="none">
-      <circle cx="27" cy="27" r="25" stroke="#00d4ff" stroke-width="2" fill="#060a0f"/>
-      <circle cx="27" cy="27" r="21" stroke="#1a3a5c" stroke-width="0.8" fill="none"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(0 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(90 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(180 27 27)"/>
-      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(270 27 27)"/>
-      <line id="logo-hour-hand" x1="27" y1="27" x2="27" y2="14" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="logo-minute-hand" x1="27" y1="27" x2="27" y2="10" stroke="#cde8ff" stroke-width="1.5" stroke-linecap="round"/>
-      <line id="logo-second-hand" x1="27" y1="30" x2="27" y2="9" stroke="#ff3b3b" stroke-width="1" stroke-linecap="round"/>
-      <circle cx="27" cy="27" r="2.5" fill="#00d4ff"/>
-      <circle cx="15" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
-      <circle cx="39" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
-    </svg>
-    <h1>NEO ALARM CLOCK</h1>
-  </div>
-</div>
-
-<!-- NAV TABS -->
-<div class="nav-tabs">
-  <button class="nav-tab active" onclick="showPage('clock',this)">🕐<br>CLOCK</button>
-  <button class="nav-tab" onclick="showPage('alarm',this)">⏰<br>ALARM</button>
-  <button class="nav-tab" onclick="showPage('timer',this)">⏱<br>TIMER</button>
-  <button class="nav-tab" onclick="showPage('stopwatch',this)">⏲<br>WATCH</button>
-  <button class="nav-tab" onclick="showPage('world',this)">🌍<br>WORLD</button>
-  <button class="nav-tab" onclick="showPage('settings',this)">⚙️<br>SET</button>
-</div>
-
-<!-- CLOCK PAGE -->
-<div class="page active" id="page-clock">
-  <div class="panel" style="text-align:center">
-    <div id="clock">00:00:00</div>
-    <div class="date-container">
-      <div id="dayName">SUNDAY</div>
-      <div id="dateNum">01</div>
-      <div id="monthYear">JANUARY · 2026</div>
+  <div class="brand">
+    <div class="brand-row">
+      <svg class="logo-clock" viewBox="0 0 54 54" fill="none">
+        <circle cx="27" cy="27" r="25" stroke="var(--glow)" stroke-width="2" fill="var(--bg)"/>
+        <circle cx="27" cy="27" r="21" stroke="var(--border)" stroke-width=".8"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="var(--glow)" stroke-width="2" transform="rotate(0 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="var(--glow)" stroke-width="2" transform="rotate(90 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="var(--glow)" stroke-width="2" transform="rotate(180 27 27)"/>
+        <line x1="27" y1="4" x2="27" y2="8" stroke="var(--glow)" stroke-width="2" transform="rotate(270 27 27)"/>
+        <line id="lh" x1="27" y1="27" x2="27" y2="15" stroke="var(--glow)" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="lm" x1="27" y1="27" x2="27" y2="11" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="ls" x1="27" y1="30" x2="27" y2="10" stroke="var(--red)" stroke-width="1" stroke-linecap="round"/>
+        <circle cx="27" cy="27" r="2.5" fill="var(--glow)"/>
+        <circle cx="15" cy="8" r="2" fill="var(--glow)" opacity=".6"/>
+        <circle cx="39" cy="8" r="2" fill="var(--glow)" opacity=".6"/>
+      </svg>
+      <h1>NEO ALARM CLOCK</h1>
     </div>
   </div>
-  <div class="ringing-banner" id="ringingBanner">
-    <div class="ringing-title">⏰ ALARM RINGING!</div>
-    <div class="ringing-label" id="ringingLabel">ALARM</div>
-    <div class="snooze-btns">
-      <button class="btn-snooze" onclick="snooze(5)">😴 5 MIN</button>
-      <button class="btn-snooze" onclick="snooze(10)">😴 10 MIN</button>
-      <button class="btn-snooze" onclick="snoozeCustom()">⏱ CUSTOM</button>
-      <button class="btn btn-danger" onclick="stopAlarm()">■ STOP</button>
-    </div>
-    <div id="snoozeCount" style="font-size:0.6rem;color:var(--dim);margin-top:6px"></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('clock',this)">🕐<br><span data-t="navClock">CLOCK</span></button>
+    <button class="nav-tab" onclick="showPage('alarm',this)">⏰<br><span data-t="navAlarm">ALARM</span></button>
+    <button class="nav-tab" onclick="showPage('timer',this)">⏱<br><span data-t="navTimer">TIMER</span></button>
+    <button class="nav-tab" onclick="showPage('stopwatch',this)">⏲<br><span data-t="navWatch">WATCH</span></button>
+    <button class="nav-tab" onclick="showPage('world',this)">🌍<br><span data-t="navWorld">WORLD</span></button>
+    <button class="nav-tab" onclick="showPage('settings',this)">⚙️<br><span data-t="navSet">SET</span></button>
   </div>
-</div>
 
-<!-- ALARM PAGE -->
-<div class="page" id="page-alarm">
-  <div class="panel">
-    <div class="sec-label">SET NEW ALARM</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="row">
-        <input type="time" id="alarmTime">
-        <input type="text" id="alarmLabel" placeholder="Label">
+  <div class="page active" id="page-clock">
+    <div class="panel" style="text-align:center">
+      <div id="clock">--:--:--</div>
+      <div class="date-container"><div id="dayName">---</div><div id="dateNum">--</div><div id="monthYear">--- · ----</div></div>
+    </div>
+    <div class="ringing-banner" id="ringingBanner">
+      <div class="ringing-title" id="ringTitle">⏰ ALARM RINGING!</div>
+      <div class="ringing-label" id="ringingLabel">ALARM</div>
+      <div class="snooze-btns">
+        <button class="btn-snooze" onclick="doSnooze(5)" data-t="snooze5">😴 5 MIN</button>
+        <button class="btn-snooze" onclick="doSnooze(10)" data-t="snooze10">😴 10 MIN</button>
+        <button class="btn-snooze" onclick="document.getElementById('snoozeModal').classList.add('show')" data-t="snoozeCustom">⏱ CUSTOM</button>
+        <button class="btn btn-danger" onclick="stopAlarm()" data-t="stop">■ STOP</button>
       </div>
-      <div class="sec-label">CHOOSE SOUND</div>
-      <div class="sound-grid">
-        <button class="sound-btn selected" data-sound="rooster" onclick="selectSound('rooster',this)">🐓 Rooster</button>
-        <button class="sound-btn" data-sound="bell" onclick="selectSound('bell',this)">🔔 Bell</button>
-        <button class="sound-btn" data-sound="beep" onclick="selectSound('beep',this)">📡 Beep</button>
-        <button class="sound-btn" data-sound="chime" onclick="selectSound('chime',this)">🎵 Chime</button>
-        <button class="sound-btn" data-sound="buzz" onclick="selectSound('buzz',this)">⚡ Buzz</button>
-        <button class="sound-btn" data-sound="digital" onclick="selectSound('digital',this)">💻 Digital</button>
-        <button class="sound-btn" data-sound="rain" onclick="selectSound('rain',this)">🌧 Rain</button>
-        <button class="sound-btn" data-sound="birds" onclick="selectSound('birds',this)">🐦 Birds</button>
-        <button class="sound-btn" data-sound="ocean" onclick="selectSound('ocean',this)">🌊 Ocean</button>
-        <button class="sound-btn" data-sound="custom" onclick="selectSound('custom',this)" style="grid-column:span 3">🎵 Custom Sound</button>
+      <div id="snoozeCountInfo" style="font-size:.6rem;color:var(--dim);margin-top:6px"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-alarm">
+    <div class="panel">
+      <div class="sl" data-t="setAlarm">SET NEW ALARM</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="row">
+          <input type="time" id="alarmTime">
+          <input type="text" id="alarmLabel" data-tp="labelPh" placeholder="Label">
+        </div>
+        <div class="sl" data-t="chooseSound">CHOOSE SOUND</div>
+        <div class="sound-grid" id="soundGrid">
+          <button class="sound-btn selected" onclick="selSound('rooster',this)">🐓 Rooster</button>
+          <button class="sound-btn" onclick="selSound('bell',this)">🔔 Bell</button>
+          <button class="sound-btn" onclick="selSound('beep',this)">📡 Beep</button>
+          <button class="sound-btn" onclick="selSound('chime',this)">🎵 Chime</button>
+          <button class="sound-btn" onclick="selSound('buzz',this)">⚡ Buzz</button>
+          <button class="sound-btn" onclick="selSound('digital',this)">💻 Digital</button>
+          <button class="sound-btn" onclick="selSound('rain',this)">🌧 Rain</button>
+          <button class="sound-btn" onclick="selSound('birds',this)">🐦 Birds</button>
+          <button class="sound-btn" onclick="selSound('ocean',this)">🌊 Ocean</button>
+          <button class="sound-btn" onclick="selSound('custom',this)" style="grid-column:span 3" id="customSoundBtn" data-t="customSound">🎵 Custom Sound</button>
+        </div>
+        <div id="soundStatus" class="sound-status"></div>
+        <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()">
+          <span data-t="uploadBtn">📁 Upload MP3 / WAV</span>
+          <input type="file" id="customSoundFile" accept="audio/*" style="display:none" onchange="handleUpload(this)">
+        </div>
+        <div class="custom-sound-name" id="customSoundName"></div>
+        <div class="range-row">
+          <label data-t="volume">🔊 VOLUME</label>
+          <input type="range" id="alarmVol" min="0" max="100" value="80" oninput="document.getElementById('volVal').textContent=this.value+'%'">
+          <span class="range-val" id="volVal">80%</span>
+        </div>
+        <div class="toggle-row">
+          <div><label data-t="gradual">📈 GRADUAL VOLUME</label><span data-t="gradualDesc">Slowly gets louder</span></div>
+          <label class="toggle"><input type="checkbox" id="gradualVol" checked><div class="toggle-track"></div></label>
+        </div>
+        <div class="toggle-row">
+          <div><label data-t="vibration">📳 VIBRATION</label><span data-t="vibrationDesc">Vibrate on alarm</span></div>
+          <label class="toggle"><input type="checkbox" id="vibration" checked><div class="toggle-track"></div></label>
+        </div>
+        <div class="sl" data-t="snooze">SNOOZE</div>
+        <div class="row">
+          <select id="snoozeTime"><option value="5">5 min</option><option value="10" selected>10 min</option><option value="15">15 min</option></select>
+          <select id="snoozeLimit"><option value="1">1x</option><option value="2">2x</option><option value="3" selected>3x</option><option value="5">5x</option><option value="99">Unlimited</option></select>
+        </div>
+        <button class="btn btn-primary" onclick="addAlarm()" style="width:100%" data-t="setBtn">+ SET ALARM</button>
       </div>
-      <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()">
-        📁 Upload MP3 / WAV
-        <input type="file" id="customSoundFile" accept="audio/*" style="display:none" onchange="handleCustomSound(this)">
-      </div>
-      <div class="custom-sound-name" id="customSoundName"></div>
-      <div class="range-row">
-        <label>🔊 VOLUME</label>
-        <input type="range" id="alarmVol" min="0" max="100" value="80" oninput="updateVolDisplay(this.value)">
-        <span class="range-val" id="volVal">80%</span>
-      </div>
-      <div class="toggle-row">
-        <div><label>📈 GRADUAL VOLUME</label><span>Slowly gets louder</span></div>
-        <label class="toggle"><input type="checkbox" id="gradualVol" checked><div class="toggle-track"></div></label>
-      </div>
-      <div class="toggle-row">
-        <div><label>📳 VIBRATION</label><span>Vibrate on alarm</span></div>
-        <label class="toggle"><input type="checkbox" id="vibration" checked><div class="toggle-track"></div></label>
-      </div>
-      <div class="sec-label">SNOOZE</div>
-      <div class="row">
-        <select id="snoozeTime">
-          <option value="5">5 min</option>
-          <option value="10" selected>10 min</option>
-          <option value="15">15 min</option>
-        </select>
-        <select id="snoozeLimit">
-          <option value="1">1x</option>
-          <option value="2">2x</option>
-          <option value="3" selected>3x</option>
-          <option value="5">5x</option>
-          <option value="99">Unlimited</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="addAlarm()" style="width:100%">+ SET ALARM</button>
+    </div>
+    <div class="panel">
+      <div class="sl" data-t="myAlarms">MY ALARMS</div>
+      <div class="alarm-list" id="alarmList"><div class="no-alarms" data-t="noAlarms">[ NO ALARMS SET ]</div></div>
     </div>
   </div>
-  <div class="panel">
-    <div class="sec-label">MY ALARMS</div>
-    <div class="alarm-list" id="alarmList">
-      <div class="no-alarms" id="noAlarms">[ NO ALARMS SET ]</div>
-    </div>
-  </div>
-</div>
 
-<!-- TIMER PAGE -->
-<div class="page" id="page-timer">
-  <div class="panel">
-    <div class="sec-label">COUNTDOWN TIMER</div>
-    <div class="timer-display" id="timerDisplay">00:00:00</div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <input type="number" id="timerH" placeholder="HH" min="0" max="23" style="text-align:center">
-      <input type="number" id="timerM" placeholder="MM" min="0" max="59" style="text-align:center">
-      <input type="number" id="timerS" placeholder="SS" min="0" max="59" style="text-align:center">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-primary" onclick="startTimer()" style="flex:1">▶ START</button>
-      <button class="btn btn-secondary" onclick="pauseTimer()" style="flex:1">⏸ PAUSE</button>
-      <button class="btn btn-secondary" onclick="resetTimer()" style="flex:1">↺ RESET</button>
-    </div>
-    <div id="timerFinish" style="display:none;text-align:center;margin-top:12px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);animation:alarmFlash 0.5s infinite">⏰ TIME'S UP!</div>
-      <button class="btn btn-danger" onclick="stopTimerAlarm()" style="margin-top:8px">■ STOP</button>
-    </div>
-  </div>
-</div>
-
-<!-- STOPWATCH PAGE -->
-<div class="page" id="page-stopwatch">
-  <div class="panel">
-    <div class="sec-label">STOPWATCH</div>
-    <div class="stopwatch-display" id="swDisplay">00:00:00.0</div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-primary" onclick="startSW()" style="flex:1" id="swStartBtn">▶ START</button>
-      <button class="btn btn-secondary" onclick="lapSW()" style="flex:1">🏁 LAP</button>
-      <button class="btn btn-secondary" onclick="resetSW()" style="flex:1">↺ RESET</button>
-    </div>
-    <div class="lap-list" id="lapList"></div>
-  </div>
-</div>
-
-<!-- WORLD CLOCK -->
-<div class="page" id="page-world">
-  <div class="panel">
-    <div class="sec-label">WORLD CLOCK</div>
-    <div class="world-clocks" id="worldClocks"></div>
-  </div>
-</div>
-
-<!-- SETTINGS PAGE -->
-<div class="page" id="page-settings">
-  <div class="panel">
-    <div class="sec-label">THEME</div>
-    <div class="theme-grid" id="themeGrid"></div>
-  </div>
-  <div class="panel">
-    <div class="sec-label">LANGUAGE</div>
-    <div class="lang-grid" id="langGrid"></div>
-  </div>
-  <div class="panel">
-    <div class="sec-label">APP SETTINGS</div>
-    <div class="settings-row">
-      <label>🌍 HOME TIMEZONE</label>
-      <select id="homeTz" onchange="saveSettings()">
-        <option value="Asia/Kolkata">🇮🇳 India (IST)</option>
-        <option value="Europe/London">🇬🇧 UK (GMT/BST)</option>
-        <option value="America/Toronto">🇨🇦 Canada East</option>
-        <option value="America/New_York">🇺🇸 USA East</option>
-        <option value="America/Los_Angeles">🇺🇸 USA West</option>
-        <option value="Asia/Dubai">🇦🇪 Dubai (GST)</option>
-        <option value="Australia/Sydney">🇦🇺 Australia</option>
-        <option value="Asia/Tokyo">🇯🇵 Japan</option>
-        <option value="Europe/Paris">🇫🇷 France</option>
-        <option value="America/Vancouver">🇨🇦 Canada West</option>
-      </select>
-    </div>
-    <div class="settings-row toggle-row">
-      <div><label>🌙 24 HOUR FORMAT</label></div>
-      <label class="toggle"><input type="checkbox" id="use24h" onchange="saveSettings()"><div class="toggle-track"></div></label>
-    </div>
-    <div class="settings-row">
-      <label style="color:var(--red);cursor:pointer" onclick="clearAllAlarms()">🗑 CLEAR ALL ALARMS</label>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="sec-label">ABOUT</div>
-    <div style="font-size:0.65rem;color:var(--dim);line-height:2">
-      <div>App: <span style="color:var(--glow)">Neo Alarm Clock</span></div>
-      <div>Version: <span style="color:var(--glow)">4.0.0</span></div>
-      <div>Sounds: <span style="color:var(--glow)">9 MP3 + Custom</span></div>
-      <div>Features: <span style="color:var(--glow)">Timer · Stopwatch · World Clock · Themes · Languages</span></div>
-    </div>
-  </div>
-</div>
-
-<div class="status-bar">
-  <div><span class="status-dot"></span>ONLINE</div>
-  <div id="alarmCount">0 ALARMS</div>
-  <div>v4.0.0</div>
-</div>
-          </div>
-          <script>
-let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
-let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber","lang":"en"}');
-let selectedSound='rooster',customSoundURL=null,ringingId=null,snoozeCount=0;
-let timerInterval=null,timerRemaining=0,timerRunning=false;
-let swInterval=null,swRunning=false,swElapsed=0,swLapTime=0,laps=[];
-
-const soundFiles={
-  rooster:'sounds/Rooster.mp3',
-  bell:'sounds/Bell.mp3',
-  beep:'sounds/Beep.mp3',
-  chime:'sounds/chime.mp3',
-  buzz:'sounds/Buzz.mp3',
-  digital:'sounds/Digital.mp3',
-  rain:'sounds/Rain.mp3',
-  birds:'sounds/bird.mp3',
-  ocean:'sounds/Ocean.mp3'
-};
-
-const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
-
-const worldCities=[
-  {city:'INDIA',tz:'Asia/Kolkata',flag:'🇮🇳'},
-  {city:'UK',tz:'Europe/London',flag:'🇬🇧'},
-  {city:'CANADA E',tz:'America/Toronto',flag:'🇨🇦'},
-  {city:'USA EAST',tz:'America/New_York',flag:'🇺🇸'},
-  {city:'USA WEST',tz:'America/Los_Angeles',flag:'🇺🇸'},
-  {city:'DUBAI',tz:'Asia/Dubai',flag:'🇦🇪'},
-  {city:'AUSTRALIA',tz:'Australia/Sydney',flag:'🇦🇺'},
-  {city:'JAPAN',tz:'Asia/Tokyo',flag:'🇯🇵'},
-  {city:'FRANCE',tz:'Europe/Paris',flag:'🇫🇷'},
-  {city:'CANADA W',tz:'America/Vancouver',flag:'🇨🇦'},
-  {city:'GERMANY',tz:'Europe/Berlin',flag:'🇩🇪'},
-  {city:'CHINA',tz:'Asia/Shanghai',flag:'🇨🇳'},
-  {city:'BRAZIL',tz:'America/Sao_Paulo',flag:'🇧🇷'},
-  {city:'RUSSIA',tz:'Europe/Moscow',flag:'🇷🇺'},
-  {city:'KOREA',tz:'Asia/Seoul',flag:'🇰🇷'},
-  {city:'SINGAPORE',tz:'Asia/Singapore',flag:'🇸🇬'},
-  {city:'PAKISTAN',tz:'Asia/Karachi',flag:'🇵🇰'},
-  {city:'ITALY',tz:'Europe/Rome',flag:'🇮🇹'},
-  {city:'SPAIN',tz:'Europe/Madrid',flag:'🇪🇸'},
-  {city:'MEXICO',tz:'America/Mexico_City',flag:'🇲🇽'},
-  {city:'EGYPT',tz:'Africa/Cairo',flag:'🇪🇬'},
-  {city:'TURKEY',tz:'Europe/Istanbul',flag:'🇹🇷'},
-  {city:'INDONESIA',tz:'Asia/Jakarta',flag:'🇮🇩'},
-  {city:'NIGERIA',tz:'Africa/Lagos',flag:'🇳🇬'},
-  {city:'ARGENTINA',tz:'America/Argentina/Buenos_Aires',flag:'🇦🇷'},
-  {city:'THAILAND',tz:'Asia/Bangkok',flag:'🇹🇭'},
-  {city:'VIETNAM',tz:'Asia/Ho_Chi_Minh',flag:'🇻🇳'},
-  {city:'SAUDI',tz:'Asia/Riyadh',flag:'🇸🇦'},
-  {city:'BANGLADESH',tz:'Asia/Dhaka',flag:'🇧🇩'},
-  {city:'NEW YORK',tz:'America/New_York',flag:'🗽'}
-];
-
-const themes={
-  cyber:{name:'Cyber',bg:'#060a0f',panel:'#0d1520',border:'#1a3a5c',glow:'#00d4ff',text:'#cde8ff',dim:'#3a6080'},
-  dark:{name:'Dark',bg:'#0a0a0a',panel:'#141414',border:'#2a2a2a',glow:'#ffffff',text:'#e0e0e0',dim:'#555'},
-  green:{name:'Matrix',bg:'#010f01',panel:'#021402',border:'#0a3a0a',glow:'#00ff41',text:'#ccffcc',dim:'#1a5c1a'},
-  purple:{name:'Purple',bg:'#0a0514',panel:'#120a1e',border:'#2a1a4a',glow:'#bf5fff',text:'#e8ccff',dim:'#5a3a80'},
-  sunset:{name:'Sunset',bg:'#0f0805',panel:'#1e100a',border:'#4a2010',glow:'#ff6b35',text:'#ffe0cc',dim:'#804020'},
-  light:{name:'Light',bg:'#f0f4f8',panel:'#ffffff',border:'#c0d0e0',glow:'#0066cc',text:'#1a2a3a',dim:'#7a9ab0'}
-};
-
-const languages={
-  en:{name:'English',flag:'🇬🇧'},
-  hi:{name:'हिंदी',flag:'🇮🇳'},
-  ar:{name:'العربية',flag:'🇸🇦'},
-  fr:{name:'Français',flag:'🇫🇷'},
-  es:{name:'Español',flag:'🇪🇸'},
-  de:{name:'Deutsch',flag:'🇩🇪'},
-  ja:{name:'日本語',flag:'🇯🇵'},
-  zh:{name:'中文',flag:'🇨🇳'},
-  pt:{name:'Português',flag:'🇧🇷'},
-  ru:{name:'Русский',flag:'🇷🇺'},
-  ko:{name:'한국어',flag:'🇰🇷'},
-  id:{name:'Indonesia',flag:'🇮🇩'},
-  tr:{name:'Türkçe',flag:'🇹🇷'},
-  vi:{name:'Tiếng Việt',flag:'🇻🇳'},
-  th:{name:'ภาษาไทย',flag:'🇹🇭'},
-  ur:{name:'اردو',flag:'🇵🇰'},
-  bn:{name:'বাংলা',flag:'🇧🇩'},
-  it:{name:'Italiano',flag:'🇮🇹'},
-  nl:{name:'Nederlands',flag:'🇳🇱'},
-  pl:{name:'Polski',flag:'🇵🇱'}
-};
-
-const translations={
-  en:{setAlarm:'SET NEW ALARM',chooseSound:'CHOOSE SOUND',volume:'🔊 VOLUME',gradual:'📈 GRADUAL VOLUME',gradualDesc:'Slowly gets louder',vibration:'📳 VIBRATION',vibrationDesc:'Vibrate on alarm',snooze:'SNOOZE',setBtn:'+ SET ALARM',myAlarms:'MY ALARMS',noAlarms:'[ NO ALARMS SET ]',wakeup:'⏰ ALARM RINGING!',stop:'■ STOP',timerLabel:'COUNTDOWN TIMER',start:'▶ START',pause:'⏸ PAUSE',reset:'↺ RESET',timesup:"⏰ TIME'S UP!",stopwatch:'STOPWATCH',lap:'🏁 LAP',worldClock:'WORLD CLOCK',themeLabel:'THEME',langLabel:'LANGUAGE',appSettings:'APP SETTINGS',timezone:'🌍 HOME TIMEZONE',format24:'🌙 24 HOUR FORMAT',clearAll:'🗑 CLEAR ALL ALARMS',customSound:'🎵 Custom Sound',uploadBtn:'📁 Upload MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ CUSTOM'},
-  hi:{setAlarm:'नया अलार्म सेट करें',chooseSound:'ध्वनि चुनें',volume:'🔊 आवाज़',gradual:'📈 धीरे धीरे',gradualDesc:'धीरे-धीरे तेज होती है',vibration:'📳 कंपन',vibrationDesc:'अलार्म पर कंपन',snooze:'स्नूज़',setBtn:'+ अलार्म सेट करें',myAlarms:'मेरे अलार्म',noAlarms:'[ कोई अलार्म नहीं ]',wakeup:'⏰ उठो! अलार्म बज रहा है!',stop:'■ बंद करें',timerLabel:'काउंटडाउन टाइमर',start:'▶ शुरू',pause:'⏸ रोकें',reset:'↺ रीसेट',timesup:'⏰ समय हो गया!',stopwatch:'स्टॉपवॉच',lap:'🏁 लैप',worldClock:'विश्व घड़ी',themeLabel:'थीम',langLabel:'भाषा',appSettings:'ऐप सेटिंग',timezone:'🌍 समय क्षेत्र',format24:'🌙 24 घंटे',clearAll:'🗑 सभी अलार्म हटाएं',customSound:'🎵 कस्टम ध्वनि',uploadBtn:'📁 MP3/WAV अपलोड करें',snooze5:'😴 5 मिनट',snooze10:'😴 10 मिनट',snoozeC:'⏱ कस्टम'},
-  ar:{setAlarm:'ضبط منبه جديد',chooseSound:'اختر صوتاً',volume:'🔊 الصوت',gradual:'📈 صوت تدريجي',gradualDesc:'يزداد تدريجياً',vibration:'📳 اهتزاز',vibrationDesc:'اهتزاز عند المنبه',snooze:'غفوة',setBtn:'+ ضبط منبه',myAlarms:'منبهاتي',noAlarms:'[ لا توجد منبهات ]',wakeup:'⏰ المنبه يرن!',stop:'■ إيقاف',timerLabel:'مؤقت العد التنازلي',start:'▶ ابدأ',pause:'⏸ توقف',reset:'↺ إعادة',timesup:'⏰ انتهى الوقت!',stopwatch:'ساعة إيقاف',lap:'🏁 لفة',worldClock:'ساعة العالم',themeLabel:'المظهر',langLabel:'اللغة',appSettings:'إعدادات التطبيق',timezone:'🌍 المنطقة الزمنية',format24:'🌙 24 ساعة',clearAll:'🗑 مسح جميع المنبهات',customSound:'🎵 صوت مخصص',uploadBtn:'📁 رفع MP3/WAV',snooze5:'😴 5 دقائق',snooze10:'😴 10 دقائق',snoozeC:'⏱ مخصص'},
-  fr:{setAlarm:'NOUVELLE ALARME',chooseSound:'CHOISIR SON',volume:'🔊 VOLUME',gradual:'📈 VOLUME PROGRESSIF',gradualDesc:'Monte progressivement',vibration:'📳 VIBRATION',vibrationDesc:"Vibrer à l'alarme",snooze:'RAPPEL',setBtn:'+ RÉGLER ALARME',myAlarms:'MES ALARMES',noAlarms:'[ AUCUNE ALARME ]',wakeup:'⏰ RÉVEIL!',stop:'■ ARRÊT',timerLabel:'MINUTEUR',start:'▶ DÉBUT',pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ TEMPS ÉCOULÉ!',stopwatch:'CHRONOMÈTRE',lap:'🏁 TOUR',worldClock:'HORLOGE MONDIALE',themeLabel:'THÈME',langLabel:'LANGUE',appSettings:'PARAMÈTRES',timezone:'🌍 FUSEAU HORAIRE',format24:'🌙 FORMAT 24H',clearAll:'🗑 EFFACER ALARMES',customSound:'🎵 Son Personnalisé',uploadBtn:'📁 Importer MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONNALISÉ'},
-  es:{setAlarm:'NUEVA ALARMA',chooseSound:'ELEGIR SONIDO',volume:'🔊 VOLUMEN',gradual:'📈 VOLUMEN GRADUAL',gradualDesc:'Sube gradualmente',vibration:'📳 VIBRACIÓN',vibrationDesc:'Vibrar en alarma',snooze:'POSPONER',setBtn:'+ PONER ALARMA',myAlarms:'MIS ALARMAS',noAlarms:'[ SIN ALARMAS ]',wakeup:'⏰ ¡ALARMA!',stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIO',pause:'⏸ PAUSA',reset:'↺ RESET',timesup:'⏰ ¡TIEMPO!',stopwatch:'CRONÓMETRO',lap:'🏁 VUELTA',worldClock:'RELOJ MUNDIAL',themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURACIÓN',timezone:'🌍 ZONA HORARIA',format24:'🌙 FORMATO 24H',clearAll:'🗑 BORRAR ALARMAS',customSound:'🎵 Sonido Personalizado',uploadBtn:'📁 Subir MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
-  de:{setAlarm:'NEUER ALARM',chooseSound:'TON WÄHLEN',volume:'🔊 LAUTSTÄRKE',gradual:'📈 SANFTER START',gradualDesc:'Wird langsam lauter',vibration:'📳 VIBRATION',vibrationDesc:'Vibration bei Alarm',snooze:'SCHLUMMER',setBtn:'+ ALARM STELLEN',myAlarms:'MEINE ALARME',noAlarms:'[ KEINE ALARME ]',wakeup:'⏰ ALARM!',stop:'■ STOP',timerLabel:'COUNTDOWN',start:'▶ START',pause:'⏸ PAUSE',reset:'↺ RESET',timesup:'⏰ ZEIT IST UM!',stopwatch:'STOPPUHR',lap:'🏁 RUNDE',worldClock:'WELTUHR',themeLabel:'DESIGN',langLabel:'SPRACHE',appSettings:'EINSTELLUNGEN',timezone:'🌍 ZEITZONE',format24:'🌙 24H FORMAT',clearAll:'🗑 ALARME LÖSCHEN',customSound:'🎵 Eigener Ton',uploadBtn:'📁 MP3/WAV Hochladen',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ BENUTZERDEFINIERT'},
-  ja:{setAlarm:'アラーム設定',chooseSound:'サウンド選択',volume:'🔊 音量',gradual:'📈 徐々に大きく',gradualDesc:'徐々に音が大きくなります',vibration:'📳 バイブレーション',vibrationDesc:'アラーム時に振動',snooze:'スヌーズ',setBtn:'+ アラーム設定',myAlarms:'マイアラーム',noAlarms:'[ アラームなし ]',wakeup:'⏰ アラーム！',stop:'■ 停止',timerLabel:'カウントダウン',start:'▶ スタート',pause:'⏸ 一時停止',reset:'↺ リセット',timesup:'⏰ 時間です！',stopwatch:'ストップウォッチ',lap:'🏁 ラップ',worldClock:'世界時計',themeLabel:'テーマ',langLabel:'言語',appSettings:'アプリ設定',timezone:'🌍 タイムゾーン',format24:'🌙 24時間',clearAll:'🗑 全削除',customSound:'🎵 カスタム音',uploadBtn:'📁 MP3/WAV アップロード',snooze5:'😴 5分',snooze10:'😴 10分',snoozeC:'⏱ カスタム'},
-  zh:{setAlarm:'设置闹钟',chooseSound:'选择声音',volume:'🔊 音量',gradual:'📈 渐强音量',gradualDesc:'声音逐渐增大',vibration:'📳 振动',vibrationDesc:'闹钟时振动',snooze:'贪睡',setBtn:'+ 设置闹钟',myAlarms:'我的闹钟',noAlarms:'[ 没有闹钟 ]',wakeup:'⏰ 闹钟响了！',stop:'■ 停止',timerLabel:'倒计时',start:'▶ 开始',pause:'⏸ 暂停',reset:'↺ 重置',timesup:'⏰ 时间到！',stopwatch:'秒表',lap:'🏁 圈',worldClock:'世界时钟',themeLabel:'主题',langLabel:'语言',appSettings:'应用设置',timezone:'🌍 时区',format24:'🌙 24小时制',clearAll:'🗑 清除所有闹钟',customSound:'🎵 自定义声音',uploadBtn:'📁 上传 MP3/WAV',snooze5:'😴 5分钟',snooze10:'😴 10分钟',snoozeC:'⏱ 自定义'},
-  pt:{setAlarm:'NOVO ALARME',chooseSound:'ESCOLHER SOM',volume:'🔊 VOLUME',gradual:'📈 VOLUME GRADUAL',gradualDesc:'Aumenta gradualmente',vibration:'📳 VIBRAÇÃO',vibrationDesc:'Vibrar no alarme',snooze:'SONECA',setBtn:'+ DEFINIR ALARME',myAlarms:'MEUS ALARMES',noAlarms:'[ SEM ALARMES ]',wakeup:'⏰ ALARME!',stop:'■ PARAR',timerLabel:'TEMPORIZADOR',start:'▶ INICIAR',pause:'⏸ PAUSAR',reset:'↺ RESET',timesup:'⏰ TEMPO ESGOTADO!',stopwatch:'CRONÔMETRO',lap:'🏁 VOLTA',worldClock:'RELÓGIO MUNDIAL',themeLabel:'TEMA',langLabel:'IDIOMA',appSettings:'CONFIGURAÇÕES',timezone:'🌍 FUSO HORÁRIO',format24:'🌙 FORMATO 24H',clearAll:'🗑 APAGAR ALARMES',customSound:'🎵 Som Personalizado',uploadBtn:'📁 Enviar MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO'},
-  ru:{setAlarm:'НОВЫЙ БУДИЛЬНИК',chooseSound:'ВЫБОР ЗВУКА',volume:'🔊 ГРОМКОСТЬ',gradual:'📈 НАРАСТАНИЕ',gradualDesc:'Постепенно громче',vibration:'📳 ВИБРАЦИЯ',vibrationDesc:'Вибрация при будильнике',snooze:'ДРЕМОТА',setBtn:'+ УСТАНОВИТЬ',myAlarms:'МОИ БУДИЛЬНИКИ',noAlarms:'[ НЕТ БУДИЛЬНИКОВ ]',wakeup:'⏰ БУДИЛЬНИК!',stop:'■ СТОП',timerLabel:'ОБРАТНЫЙ ОТСЧЁТ',start:'▶ СТАРТ',pause:'⏸ ПАУЗА',reset:'↺ СБРОС',timesup:'⏰ ВРЕМЯ ВЫШЛО!',stopwatch:'СЕКУНДОМЕР',lap:'🏁 КРУГ',worldClock:'МИРОВЫЕ ЧАСЫ',themeLabel:'ТЕМА',langLabel:'ЯЗЫК',appSettings:'НАСТРОЙКИ',timezone:'🌍 ЧАСОВОЙ ПОЯС',format24:'🌙 24 ЧАСА',clearAll:'🗑 УДАЛИТЬ ВСЕ',customSound:'🎵 Свой звук',uploadBtn:'📁 Загрузить MP3/WAV',snooze5:'😴 5 МИН',snooze10:'😴 10 МИН',snoozeC:'⏱ ДРУГОЕ'},
-  ko:{setAlarm:'알람 설정',chooseSound:'소리 선택',volume:'🔊 볼륨',gradual:'📈 점진적 볼륨',gradualDesc:'서서히 커집니다',vibration:'📳 진동',vibrationDesc:'알람 시 진동',snooze:'스누즈',setBtn:'+ 알람 설정',myAlarms:'내 알람',noAlarms:'[ 알람 없음 ]',wakeup:'⏰ 알람!',stop:'■ 정지',timerLabel:'카운트다운',start:'▶ 시작',pause:'⏸ 일시정지',reset:'↺ 초기화',timesup:'⏰ 시간 종료!',stopwatch:'스톱워치',lap:'🏁 랩',worldClock:'세계 시계',themeLabel:'테마',langLabel:'언어',appSettings:'앱 설정',timezone:'🌍 시간대',format24:'🌙 24시간',clearAll:'🗑 모두 삭제',customSound:'🎵 커스텀 사운드',uploadBtn:'📁 MP3/WAV 업로드',snooze5:'😴 5분',snooze10:'😴 10분',snoozeC:'⏱ 직접입력'},
-  id:{setAlarm:'ATUR ALARM BARU',chooseSound:'PILIH SUARA',volume:'🔊 VOLUME',gradual:'📈 VOLUME BERTAHAP',gradualDesc:'Perlahan semakin keras',vibration:'📳 GETAR',vibrationDesc:'Getar saat alarm',snooze:'TUNDA',setBtn:'+ ATUR ALARM',myAlarms:'ALARM SAYA',noAlarms:'[ TIDAK ADA ALARM ]',wakeup:'⏰ ALARM BERBUNYI!',stop:'■ BERHENTI',timerLabel:'TIMER HITUNG MUNDUR',start:'▶ MULAI',pause:'⏸ JEDA',reset:'↺ RESET',timesup:'⏰ WAKTU HABIS!',stopwatch:'STOPWATCH',lap:'🏁 LAP',worldClock:'JAM DUNIA',themeLabel:'TEMA',langLabel:'BAHASA',appSettings:'PENGATURAN',timezone:'🌍 ZONA WAKTU',format24:'🌙 FORMAT 24 JAM',clearAll:'🗑 HAPUS SEMUA ALARM',customSound:'🎵 Suara Kustom',uploadBtn:'📁 Unggah MP3/WAV',snooze5:'😴 5 MENIT',snooze10:'😴 10 MENIT',snoozeC:'⏱ KUSTOM'},
-  tr:{setAlarm:'YENİ ALARM EKLE',chooseSound:'SES SEÇ',volume:'🔊 SES',gradual:'📈 YAVAŞ BAŞLA',gradualDesc:'Yavaşça artar',vibration:'📳 TİTREŞİM',vibrationDesc:'Alarm sırasında titreşim',snooze:'ERTELEMEK',setBtn:'+ ALARM EKLE',myAlarms:'ALARMLARIM',noAlarms:'[ ALARM YOK ]',wakeup:'⏰ ALARM ÇALIYOR!',stop:'■ DURDUR',timerLabel:'GERİ SAYIM',start:'▶ BAŞLAT',pause:'⏸ DURAKLAT',reset:'↺ SIFIRLA',timesup:'⏰ SÜRE DOLDU!',stopwatch:'KRONOMETRe',lap:'🏁 LAP',worldClock:'DÜNYA SAATİ',themeLabel:'TEMA',langLabel:'DİL',appSettings:'UYGULAMA AYARLARI',timezone:'🌍 SAAT DİLİMİ',format24:'🌙 24 SAAT',clearAll:'🗑 TÜM ALARMLARI SİL',customSound:'🎵 Özel Ses',uploadBtn:'📁 MP3/WAV Yükle',snooze5:'😴 5 DAK',snooze10:'😴 10 DAK',snoozeC:'⏱ ÖZEL'},
-  it:{setAlarm:'NUOVA SVEGLIA',chooseSound:'SCEGLI SUONO',volume:'🔊 VOLUME',gradual:'📈 VOLUME GRADUALE',gradualDesc:'Aumenta gradualmente',vibration:'📳 VIBRAZIONE',vibrationDesc:'Vibra alla sveglia',snooze:'POSTICIPA',setBtn:'+ IMPOSTA SVEGLIA',myAlarms:'LE MIE SVEGLIE',noAlarms:'[ NESSUNA SVEGLIA ]',wakeup:'⏰ SVEGLIA!',stop:'■ STOP',timerLabel:'CONTO ALLA ROVESCIA',start:'▶ AVVIA',pause:'⏸ PAUSA',reset:'↺ RESET',timesup:'⏰ TEMPO SCADUTO!',stopwatch:'CRONOMETRO',lap:'🏁 GIRO',worldClock:'OROLOGIO MONDIALE',themeLabel:'TEMA',langLabel:'LINGUA',appSettings:'IMPOSTAZIONI',timezone:'🌍 FUSO ORARIO',format24:'🌙 FORMATO 24H',clearAll:'🗑 CANCELLA SVEGLIE',customSound:'🎵 Suono Personalizzato',uploadBtn:'📁 Carica MP3/WAV',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZZATO'}
-};
-
-// ── Navigation ──────────────────────────
-function showPage(p,btn){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  if(btn)btn.classList.add('active');
-}
-
-// ── Language ────────────────────────────
-function applyLang(key){
-  const t=translations[key]||translations.en;
-  settings.lang=key;
-  localStorage.setItem('settings',JSON.stringify(settings));
-  // Update UI text
-  const ids={
-    'sec-setAlarm':t.setAlarm,'sec-chooseSound':t.chooseSound,
-    'sec-snooze':t.snooze,'sec-myAlarms':t.myAlarms,
-    'sec-timer':t.timerLabel,'sec-stopwatch':t.stopwatch,
-    'sec-worldClock':t.worldClock,'sec-theme':t.themeLabel,
-    'sec-lang':t.langLabel,'sec-appSettings':t.appSettings
-  };
-  Object.entries(ids).forEach(([id,txt])=>{
-    const el=document.getElementById(id);
-    if(el)el.setAttribute('data-label',txt);
-  });
-  // Buttons
-  safeText('btn-setAlarm',t.setBtn);
-  safeText('btn-stop',t.stop);
-  safeText('btn-snooze5',t.snooze5);
-  safeText('btn-snooze10',t.snooze10);
-  safeText('btn-snoozeC',t.snoozeC);
-  safeText('btn-start',t.start);
-  safeText('btn-pause',t.pause);
-  safeText('btn-reset',t.reset);
-  safeText('btn-resetSW',t.reset);
-  safeText('btn-lap',t.lap);
-  safeText('swStartBtn',swRunning?'⏹ STOP':'▶ '+t.start);
-  safeText('txt-timesup',t.timesup);
-  safeText('txt-stopTimerBtn',t.stop);
-  safeText('lbl-volume',t.volume);
-  safeText('lbl-gradual',t.gradual);
-  safeText('lbl-gradualDesc',t.gradualDesc);
-  safeText('lbl-vibration',t.vibration);
-  safeText('lbl-vibrationDesc',t.vibrationDesc);
-  safeText('lbl-timezone',t.timezone);
-  safeText('lbl-24h',t.format24);
-  safeText('lbl-clearAll',t.clearAll);
-  safeText('lbl-wakeup',t.wakeup);
-  safeText('noAlarms',t.noAlarms);
-  const uploadEl=document.getElementById('lbl-uploadBtn');
-  if(uploadEl)uploadEl.childNodes[0].textContent=t.uploadBtn+' ';
-  const csEl=document.getElementById('btn-customSound');
-  if(csEl)csEl.textContent=t.customSound;
-  document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.lang===key));
-}
-
-function safeText(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
-
-function renderLangs(){
-  const grid=document.getElementById('langGrid');
-  grid.innerHTML=Object.entries(languages).map(([k,l])=>`
-    <div class="lang-card${settings.lang===k?' active':''}" data-lang="${k}" onclick="applyLang('${k}')">
-      <div style="font-size:1.2rem">${l.flag}</div>
-      <div>${l.name}</div>
-    </div>`).join('');
-}
-
-// ── Theme ───────────────────────────────
-function applyTheme(key){
-  const t=themes[key];if(!t)return;
-  const r=document.documentElement.style;
-  r.setProperty('--bg',t.bg);r.setProperty('--panel',t.panel);
-  r.setProperty('--border',t.border);r.setProperty('--glow',t.glow);
-  r.setProperty('--text',t.text);r.setProperty('--dim',t.dim);
-  settings.theme=key;
-  localStorage.setItem('settings',JSON.stringify(settings));
-  document.querySelectorAll('.theme-card').forEach(c=>c.classList.toggle('active',c.dataset.theme===key));
-}
-
-function renderThemes(){
-  const grid=document.getElementById('themeGrid');
-  grid.innerHTML=Object.entries(themes).map(([k,t])=>`
-    <div class="theme-card${settings.theme===k?' active':''}" data-theme="${k}" onclick="applyTheme('${k}')" style="background:${t.panel};border-color:${settings.theme===k?t.glow:t.border}">
-      <div class="theme-dot" style="background:${t.glow};box-shadow:0 0 8px ${t.glow}"></div>
-      <div style="color:${t.text};font-size:0.6rem">${t.name}</div>
-    </div>`).join('');
-}
-
-// ── Clock ───────────────────────────────
-function updateClock(){
-  const now=new Date();
-  document.getElementById('clock').textContent=now.toLocaleTimeString('en-US',{timeZone:settings.homeTz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!settings.use24h});
-  // Separate date parts
-  const dayName=now.toLocaleDateString('en-US',{timeZone:settings.homeTz,weekday:'long'}).toUpperCase();
-  const dateNum=now.toLocaleDateString('en-US',{timeZone:settings.homeTz,day:'2-digit'});
-  const month=now.toLocaleDateString('en-US',{timeZone:settings.homeTz,month:'long'}).toUpperCase();
-  const year=now.toLocaleDateString('en-US',{timeZone:settings.homeTz,year:'numeric'});
-  document.getElementById('dayName').textContent=dayName;
-  document.getElementById('dateNum').textContent=dateNum;
-  document.getElementById('monthYear').textContent=month+' · '+year;
-  checkAlarms(now);syncLogo(now);updateWorldClocks(now);
-}
-
-function syncLogo(now){
-  const s=now.getSeconds(),m=now.getMinutes(),h=now.getHours()%12;
-  const sh=document.getElementById('logo-hour-hand');
-  const sm=document.getElementById('logo-minute-hand');
-  const ss=document.getElementById('logo-second-hand');
-  if(sh)sh.style.transform='rotate('+(h*30+m*0.5)+'deg)';
-  if(sm)sm.style.transform='rotate('+(m*6+s*0.1)+'deg)';
-  if(ss)ss.style.transform='rotate('+(s*6)+'deg)';
-}
-
-function updateWorldClocks(now){
-  const wc=document.getElementById('worldClocks');if(!wc)return;
-  wc.innerHTML=worldCities.map(c=>{
-    const t=now.toLocaleTimeString('en-US',{timeZone:c.tz,hour:'2-digit',minute:'2-digit',hour12:true});
-    const d=now.toLocaleDateString('en-US',{timeZone:c.tz,weekday:'short',month:'short',day:'2-digit'});
-    return`<div class="world-item"><div class="world-city">${c.flag} ${c.city}</div><div class="world-time">${t}</div><div class="world-date">${d}</div></div>`;
-  }).join('');
-}
-
-// ── Alarm ───────────────────────────────
-function checkAlarms(now){
-  if(ringingId!==null)return;
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  if(now.getSeconds()!==0)return;
-  alarms.forEach(a=>{if(a.enabled&&a.time===h+':'+m)triggerAlarm(a.id);});
-}
-
-function triggerAlarm(id){
-  ringingId=id;snoozeCount=0;
-  const alarm=alarms.find(a=>a.id===id);
-  d
+  <div class="page" id="page-timer">
+    <div class="panel">
+      <div class="sl" data-t="timerLabel">COUNTDOWN TIMER</div>
+      <div class="timer-display" 
