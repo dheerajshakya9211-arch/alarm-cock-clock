@@ -1,199 +1,401 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Neo Alarm Clock</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="capacitor.js"></script>
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}body{ background:#060a0f; color:#cde8ff; font-family:'Orbitron',sans-serif; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
-
-.container{ width:100%; max-width:500px; background:#0d1520; border:1px solid #1a3a5c; border-radius:10px; padding:20px; box-shadow:0 0 20px rgba(0,212,255,0.2); }
-
-h1{ text-align:center; color:#00d4ff; margin-bottom:20px; }
-
-#clock{ font-size:60px; text-align:center; color:#00d4ff; text-shadow:0 0 15px #00d4ff; margin-bottom:10px; }
-
-#date{ text-align:center; margin-bottom:25px; color:#aaa; }
-
-.tabs{ display:flex; gap:10px; margin-bottom:20px; }
-
-.tab-btn{ flex:1; padding:10px; border:none; background:#111c29; color:#888; cursor:pointer; border-radius:5px; }
-
-.tab-btn.active{ background:#00d4ff; color:#000; }
-
-.page{ display:none; }
-
-.page.active{ display:block; }
-
-input,button{ width:100%; padding:12px; margin-top:10px; border:none; border-radius:5px; }
-
-input{ background:#07111a; color:white; }
-
-.main-btn{ background:#00d4ff; color:black; font-weight:bold; cursor:pointer; }
-
-.alarm-item{ background:#07111a; padding:12px; border-radius:5px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; }
-
-.delete-btn{ background:red; color:white; width:auto; padding:8px 12px; }
-
-.timer-display, .stopwatch-display{ text-align:center; font-size:45px; color:#00ff9d; margin:20px 0; } </style>
-
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060a0f;--panel:#0d1520;--border:#1a3a5c;--glow:#00d4ff;--glow2:#ff6b35;--red:#ff3b3b;--green:#00ff9d;--text:#cde8ff;--dim:#3a6080}
+body{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;font-family:'Share Tech Mono',monospace;color:var(--text);overflow-x:hidden;padding:10px}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.container{display:flex;flex-direction:column;align-items:center;gap:12px;z-index:10;width:100%;max-width:520px}
+.brand{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.brand-row{display:flex;align-items:center;gap:12px}
+.brand h1{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,5vw,1.6rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow);animation:titlePulse 3s ease-in-out infinite}
+@keyframes titlePulse{0%,100%{text-shadow:0 0 20px var(--glow)}50%{text-shadow:0 0 40px var(--glow)}}
+.logo-clock{width:48px;height:48px;filter:drop-shadow(0 0 10px rgba(0,212,255,0.7));flex-shrink:0}
+#logo-hour-hand,#logo-minute-hand,#logo-second-hand{transform-origin:27px 27px}
+.nav-tabs{display:flex;gap:4px;width:100%}
+.nav-tab{flex:1;font-family:'Orbitron',sans-serif;font-size:0.5rem;letter-spacing:0.05em;padding:10px 2px;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;line-height:1.4;text-align:center}
+.nav-tab.active{background:rgba(0,212,255,0.15);border-color:var(--glow);color:var(--glow);box-shadow:0 0 8px rgba(0,212,255,0.2)}
+.page{display:none;width:100%;flex-direction:column;gap:12px}
+.page.active{display:flex}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;width:100%;position:relative}
+.panel::before{content:'';position:absolute;top:6px;left:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-right:none;border-bottom:none}
+.panel::after{content:'';position:absolute;bottom:6px;right:6px;width:10px;height:10px;border:1.5px solid var(--glow);border-left:none;border-top:none}
+.sec-label{font-size:0.55rem;letter-spacing:0.4em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+#clock{font-family:'Orbitron',sans-serif;font-size:clamp(3rem,14vw,5.5rem);font-weight:700;color:var(--glow);text-shadow:0 0 30px var(--glow);letter-spacing:0.05em;line-height:1;text-align:center}
+#clock.alarm-on{animation:alarmFlash 0.5s ease-in-out infinite}
+@keyframes alarmFlash{0%,100%{color:var(--glow)}50%{color:var(--red);text-shadow:0 0 40px var(--red)}}
+.date-box{text-align:center;margin-top:10px}
+#day-name{font-size:0.75rem;color:var(--glow2);letter-spacing:0.3em;margin-bottom:4px}
+#date-num{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text);letter-spacing:0.1em}
+#month-year{font-size:0.68rem;color:var(--dim);letter-spacing:0.25em;margin-top:4px}
+.world-clocks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.world-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:8px 10px}
+.world-city{font-size:0.58rem;color:var(--dim);letter-spacing:0.15em;margin-bottom:2px}
+.world-time{font-family:'Orbitron',sans-serif;font-size:0.95rem;color:var(--glow)}
+.world-date{font-size:0.52rem;color:var(--dim)}
+input[type=time],input[type=text],input[type=number],select{background:#070f1a;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:9px 10px;border-radius:3px;outline:none;width:100%;transition:border-color 0.2s}
+input[type=time]{color:var(--glow);font-family:'Orbitron',sans-serif;font-size:1rem}
+input:focus,select:focus{border-color:var(--glow)}
+select option{background:#0d1520}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.sound-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.sound-btn{background:#070f1a;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:8px 4px;border-radius:3px;cursor:pointer;text-align:center;transition:all 0.2s}
+.sound-btn.selected{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
+.range-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.range-row label{font-size:0.6rem;color:var(--dim);width:80px;flex-shrink:0}
+input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
+.range-val{font-size:0.7rem;color:var(--glow);width:36px;text-align:right}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row label{font-size:0.68rem;color:var(--text)}
+.toggle-row span{font-size:0.58rem;color:var(--dim);display:block}
+.toggle{position:relative;width:40px;height:20px;flex-shrink:0}
+.toggle input{display:none}
+.toggle-track{position:absolute;inset:0;background:#0a1825;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s}
+.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--dim);border-radius:50%;transition:all 0.3s}
+.toggle input:checked+.toggle-track{background:rgba(0,212,255,0.15);border-color:var(--glow)}
+.toggle input:checked+.toggle-track::after{transform:translateX(20px);background:var(--glow);box-shadow:0 0 8px var(--glow)}
+.btn{font-family:'Orbitron',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;padding:12px 14px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all 0.2s}
+.btn-primary{background:var(--glow);color:#000;box-shadow:0 0 16px rgba(0,212,255,0.3)}
+.btn-secondary{background:transparent;border:1px solid var(--glow);color:var(--glow)}
+.btn-danger{background:var(--red);color:#fff;animation:btnPulse 0.5s ease-in-out infinite}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 16px rgba(255,59,59,0.4)}50%{box-shadow:0 0 32px rgba(255,59,59,0.8)}}
+.btn-snooze{background:rgba(255,107,53,0.2);color:var(--glow2);border:1px solid var(--glow2);font-family:'Orbitron',sans-serif;font-size:0.6rem;padding:9px 10px;border-radius:3px;cursor:pointer}
+.alarm-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;margin-top:10px}
+.alarm-item{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px 12px}
+.alarm-item.ringing{border-color:var(--red);animation:itemFlash 0.5s ease-in-out infinite}
+@keyframes itemFlash{0%,100%{background:rgba(255,59,59,0.06)}50%{background:rgba(255,59,59,0.18)}}
+.alarm-top{display:flex;align-items:center;justify-content:space-between}
+.alarm-time-txt{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--glow)}
+.alarm-item.ringing .alarm-time-txt{color:var(--red)}
+.alarm-actions{display:flex;align-items:center;gap:8px}
+.alarm-bottom{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:0.55rem;padding:2px 7px;border-radius:2px;border:1px solid}
+.badge-label{color:var(--dim);border-color:var(--border)}
+.badge-sound{color:var(--glow2);border-color:rgba(255,107,53,0.3)}
+.badge-info{color:var(--green);border-color:rgba(0,255,157,0.3)}
+.btn-del{background:transparent;border:1px solid #2a1a1a;color:#553333;font-size:0.8rem;width:26px;height:26px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.no-alarms{text-align:center;color:var(--dim);font-size:0.65rem;padding:20px}
+.ring-overlay{display:none;position:fixed;inset:0;z-index:200;pointer-events:none}
+.ring-overlay.show{display:block;animation:ringOverlay 0.5s ease-in-out infinite}
+@keyframes ringOverlay{0%,100%{background:rgba(255,59,59,0.03)}50%{background:rgba(255,59,59,0.12)}}
+.ringing-banner{display:none;background:rgba(255,59,59,0.12);border:1px solid var(--red);border-radius:4px;padding:14px;text-align:center;width:100%}
+.ringing-banner.show{display:block}
+.ringing-title{font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--red);margin-bottom:4px;animation:alarmFlash 0.5s ease-in-out infinite}
+.ringing-label{font-size:0.75rem;color:var(--text);margin-bottom:12px}
+.snooze-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sw-display,.timer-display{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,10vw,3.5rem);font-weight:700;color:var(--glow);text-align:center;text-shadow:0 0 20px var(--glow);letter-spacing:0.05em}
+.lap-list{max-height:160px;overflow-y:auto;margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.lap-item{display:flex;justify-content:space-between;font-size:0.65rem;padding:5px 8px;background:#070f1a;border:1px solid var(--border);border-radius:3px}
+.lap-num{color:var(--dim)}
+.lap-time{color:var(--glow);font-family:'Orbitron',sans-serif}
+.lap-split{color:var(--glow2)}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme-card{border:2px solid transparent;border-radius:6px;padding:10px;cursor:pointer;text-align:center;transition:all 0.2s}
+.theme-card.active{border-color:var(--glow)}
+.theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 6px}
+.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lang-card{background:#070f1a;border:1px solid var(--border);border-radius:3px;padding:10px;cursor:pointer;text-align:center;font-size:0.68rem;color:var(--dim);transition:all 0.2s}
+.lang-card.active{background:rgba(0,212,255,0.12);border-color:var(--glow);color:var(--glow)}
+.status-bar{display:flex;justify-content:space-between;width:100%;font-size:0.55rem;color:var(--dim);letter-spacing:0.15em;padding:0 2px}
+.status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite;margin-right:5px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.settings-row{padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-row>label{font-size:0.65rem;color:var(--text);display:block;margin-bottom:6px}
+.upload-btn{background:#070f1a;border:2px dashed var(--border);color:var(--dim);width:100%;padding:12px;border-radius:3px;cursor:pointer;font-size:0.7rem;text-align:center}
+.custom-sound-name{font-size:0.65rem;color:var(--green);margin-top:6px;text-align:center}
+</style>
 </head>
-<body><div class="container"><h1>NEO ALARM CLOCK</h1><div id="clock">00:00:00</div>
-<div id="date">Loading...</div><div class="tabs">
-  <button class="tab-btn active" onclick="showPage('alarm',this)">Alarm</button>
-  <button class="tab-btn" onclick="showPage('timer',this)">Timer</button>
-  <button class="tab-btn" onclick="showPage('stopwatch',this)">Watch</button>
-</div><div class="page active" id="page-alarm">
-  <input type="time" id="alarmTime">
-  <button class="main-btn" onclick="addAlarm()">Set Alarm</button>  <div id="alarmList"></div>
-</div><div class="page" id="page-timer">
-  <input type="number" id="timerMinutes" placeholder="Minutes">  <div class="timer-display" id="timerDisplay">00:00</div><button class="main-btn" onclick="startTimer()">Start Timer</button>
+<body>
+<div class="ring-overlay" id="ringOverlay"></div>
+<div class="container">
 
-</div><div class="page" id="page-stopwatch">  <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div><button class="main-btn" onclick="toggleStopwatch()">Start / Stop</button>
+<div class="brand">
+  <div class="brand-row">
+    <svg class="logo-clock" viewBox="0 0 54 54" fill="none">
+      <circle cx="27" cy="27" r="25" stroke="#00d4ff" stroke-width="2" fill="#060a0f"/>
+      <circle cx="27" cy="27" r="21" stroke="#1a3a5c" stroke-width="0.8" fill="none"/>
+      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(0 27 27)"/>
+      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(90 27 27)"/>
+      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(180 27 27)"/>
+      <line x1="27" y1="4" x2="27" y2="8" stroke="#00d4ff" stroke-width="2" transform="rotate(270 27 27)"/>
+      <line id="logo-hour-hand" x1="27" y1="27" x2="27" y2="14" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+      <line id="logo-minute-hand" x1="27" y1="27" x2="27" y2="10" stroke="#cde8ff" stroke-width="1.5" stroke-linecap="round"/>
+      <line id="logo-second-hand" x1="27" y1="30" x2="27" y2="9" stroke="#ff3b3b" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="27" cy="27" r="2.5" fill="#00d4ff"/>
+      <circle cx="15" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
+      <circle cx="39" cy="8" r="2" fill="#00d4ff" opacity="0.6"/>
+    </svg>
+    <h1>NEO ALARM CLOCK</h1>
+  </div>
+</div>
 
-</div></div><script>
-function updateClock(){
-  const now = new Date();
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('clock',this)">🕐<br>CLOCK</button>
+  <button class="nav-tab" onclick="showPage('alarm',this)">⏰<br>ALARM</button>
+  <button class="nav-tab" onclick="showPage('timer',this)">⏱<br>TIMER</button>
+  <button class="nav-tab" onclick="showPage('stopwatch',this)">⏲<br>WATCH</button>
+  <button class="nav-tab" onclick="showPage('world',this)">🌍<br>WORLD</button>
+  <button class="nav-tab" onclick="showPage('settings',this)">⚙️<br>SET</button>
+</div>
 
-  document.getElementById('clock').innerText =
-    now.toLocaleTimeString();
+<!-- CLOCK -->
+<div class="page active" id="page-clock">
+  <div class="panel" style="text-align:center">
+    <div id="clock">00:00:00</div>
+    <div class="date-box">
+      <div id="day-name">SUNDAY</div>
+      <div id="date-num">01</div>
+      <div id="month-year">JANUARY · 2026</div>
+    </div>
+  </div>
+  <div class="ringing-banner" id="ringingBanner">
+    <div class="ringing-title">⏰ ALARM RINGING!</div>
+    <div class="ringing-label" id="ringingLabel">ALARM</div>
+    <div class="snooze-btns">
+      <button class="btn-snooze" onclick="snooze(5)">😴 5 MIN</button>
+      <button class="btn-snooze" onclick="snooze(10)">😴 10 MIN</button>
+      <button class="btn-snooze" onclick="snoozeCustom()">⏱ CUSTOM</button>
+      <button class="btn btn-danger" onclick="stopAlarm()">■ STOP</button>
+    </div>
+    <div id="snoozeCount" style="font-size:0.6rem;color:var(--dim);margin-top:6px"></div>
+  </div>
+</div>
 
-  document.getElementById('date').innerText =
-    now.toDateString();
-}
+<!-- ALARM -->
+<div class="page" id="page-alarm">
+  <div class="panel">
+    <div class="sec-label">SET NEW ALARM</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="row">
+        <input type="time" id="alarmTime">
+        <input type="text" id="alarmLabel" placeholder="Label">
+      </div>
+      <div class="sec-label">CHOOSE SOUND</div>
+      <div class="sound-grid">
+        <button class="sound-btn selected" data-sound="rooster" onclick="selectSound('rooster',this)">🐓 Rooster</button>
+        <button class="sound-btn" data-sound="bell" onclick="selectSound('bell',this)">🔔 Bell</button>
+        <button class="sound-btn" data-sound="beep" onclick="selectSound('beep',this)">📡 Beep</button>
+        <button class="sound-btn" data-sound="chime" onclick="selectSound('chime',this)">🎵 Chime</button>
+        <button class="sound-btn" data-sound="buzz" onclick="selectSound('buzz',this)">⚡ Buzz</button>
+        <button class="sound-btn" data-sound="digital" onclick="selectSound('digital',this)">💻 Digital</button>
+        <button class="sound-btn" data-sound="rain" onclick="selectSound('rain',this)">🌧 Rain</button>
+        <button class="sound-btn" data-sound="birds" onclick="selectSound('birds',this)">🐦 Birds</button>
+        <button class="sound-btn" data-sound="ocean" onclick="selectSound('ocean',this)">🌊 Ocean</button>
+        <button class="sound-btn" data-sound="custom" onclick="selectSound('custom',this)" style="grid-column:span 3">🎵 Custom Sound</button>
+      </div>
+      <div class="upload-btn" onclick="document.getElementById('customSoundFile').click()">
+        📁 Upload MP3 / WAV
+        <input type="file" id="customSoundFile" accept="audio/*" style="display:none" onchange="handleCustomSound(this)">
+      </div>
+      <div class="custom-sound-name" id="customSoundName"></div>
+      <div class="range-row">
+        <label>🔊 VOLUME</label>
+        <input type="range" id="alarmVol" min="0" max="100" value="80" oninput="document.getElementById('volVal').textContent=this.value+'%';updateVol(this.value)">
+        <span class="range-val" id="volVal">80%</span>
+      </div>
+      <div class="toggle-row">
+        <div><label>📈 GRADUAL VOLUME</label><span>Slowly gets louder</span></div>
+        <label class="toggle"><input type="checkbox" id="gradualVol" checked><div class="toggle-track"></div></label>
+      </div>
+      <div class="toggle-row">
+        <div><label>📳 VIBRATION</label><span>Vibrate on alarm</span></div>
+        <label class="toggle"><input type="checkbox" id="vibration" checked><div class="toggle-track"></div></label>
+      </div>
+      <div class="sec-label">SNOOZE</div>
+      <div class="row">
+        <select id="snoozeTime">
+          <option value="5">5 min</option>
+          <option value="10" selected>10 min</option>
+          <option value="15">15 min</option>
+        </select>
+        <select id="snoozeLimit">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="3" selected>3x</option>
+          <option value="5">5x</option>
+          <option value="99">Unlimited</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addAlarm()" style="width:100%">+ SET ALARM</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="sec-label">MY ALARMS</div>
+    <div class="alarm-list" id="alarmList">
+      <div class="no-alarms" id="noAlarms">[ NO ALARMS SET ]</div>
+    </div>
+  </div>
+</div>
 
-setInterval(updateClock,1000);
-updateClock();
+<!-- TIMER -->
+<div class="page" id="page-timer">
+  <div class="panel">
+    <div class="sec-label">COUNTDOWN TIMER</div>
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="row" style="margin-top:16px">
+      <input type="number" id="timerH" placeholder="HH" min="0" max="23" style="text-align:center">
+      <input type="number" id="timerM" placeholder="MM" min="0" max="59" style="text-align:center">
+      <input type="number" id="timerS" placeholder="SS" min="0" max="59" style="text-align:center">
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-primary" onclick="startTimer()">▶ START</button>
+      <button class="btn btn-secondary" onclick="pauseTimer()">⏸ PAUSE</button>
+      <button class="btn btn-secondary" onclick="resetTimer()">↺ RESET</button>
+    </div>
+    <div id="timerDone" style="display:none;text-align:center;margin-top:12px">
+      <div style="font-family:'Orbitron',sans-serif;color:var(--red);animation:alarmFlash 0.5s infinite">⏰ TIME'S UP!</div>
+      <button class="btn btn-danger" onclick="stopTimerSound()" style="margin-top:8px">■ STOP</button>
+    </div>
+  </div>
+</div>
 
-function showPage(page,btn){
-  document.querySelectorAll('.page').forEach(p=>{
-    p.classList.remove('active');
-  });
+<!-- STOPWATCH -->
+<div class="page" id="page-stopwatch">
+  <div class="panel">
+    <div class="sec-label">STOPWATCH</div>
+    <div class="sw-display" id="swDisplay">00:00:00.0</div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="startSW()" id="swBtn">▶ START</button>
+      <button class="btn btn-secondary" onclick="lapSW()">🏁 LAP</button>
+      <button class="btn btn-secondary" onclick="resetSW()">↺ RESET</button>
+    </div>
+    <div class="lap-list" id="lapList"></div>
+  </div>
+</div>
 
-  document.getElementById('page-'+page)
-    .classList.add('active');
+<!-- WORLD CLOCK -->
+<div class="page" id="page-world">
+  <div class="panel">
+    <div class="sec-label">WORLD CLOCK</div>
+    <div class="world-clocks" id="worldClocks"></div>
+  </div>
+</div>
 
-  document.querySelectorAll('.tab-btn').forEach(t=>{
-    t.classList.remove('active');
-  });
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="panel">
+    <div class="sec-label">THEME</div>
+    <div class="theme-grid" id="themeGrid"></div>
+  </div>
+  <div class="panel">
+    <div class="sec-label">LANGUAGE</div>
+    <div class="lang-grid" id="langGrid"></div>
+  </div>
+  <div class="panel">
+    <div class="sec-label">APP SETTINGS</div>
+    <div class="settings-row">
+      <label>🌍 HOME TIMEZONE</label>
+      <select id="homeTz" onchange="saveSettings()">
+        <option value="Asia/Kolkata">🇮🇳 India (IST)</option>
+        <option value="Europe/London">🇬🇧 UK</option>
+        <option value="America/Toronto">🇨🇦 Canada East</option>
+        <option value="America/New_York">🇺🇸 USA East</option>
+        <option value="America/Los_Angeles">🇺🇸 USA West</option>
+        <option value="Asia/Dubai">🇦🇪 Dubai</option>
+        <option value="Australia/Sydney">🇦🇺 Australia</option>
+        <option value="Asia/Tokyo">🇯🇵 Japan</option>
+        <option value="Europe/Paris">🇫🇷 France</option>
+        <option value="Europe/Berlin">🇩🇪 Germany</option>
+        <option value="Asia/Shanghai">🇨🇳 China</option>
+        <option value="America/Sao_Paulo">🇧🇷 Brazil</option>
+        <option value="Europe/Moscow">🇷🇺 Russia</option>
+        <option value="Asia/Seoul">🇰🇷 Korea</option>
+        <option value="Asia/Karachi">🇵🇰 Pakistan</option>
+        <option value="Asia/Dhaka">🇧🇩 Bangladesh</option>
+        <option value="America/Vancouver">🇨🇦 Canada West</option>
+      </select>
+    </div>
+    <div class="settings-row toggle-row">
+      <div><label>🌙 24 HOUR FORMAT</label></div>
+      <label class="toggle"><input type="checkbox" id="use24h" onchange="saveSettings()"><div class="toggle-track"></div></label>
+    </div>
+    <div class="settings-row">
+      <label style="color:var(--red);cursor:pointer" onclick="clearAllAlarms()">🗑 CLEAR ALL ALARMS</label>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="sec-label">ABOUT</div>
+    <div style="font-size:0.65rem;color:var(--dim);line-height:2">
+      <div>App: <span style="color:var(--glow)">Neo Alarm Clock</span></div>
+      <div>Version: <span style="color:var(--glow)">4.0.0</span></div>
+      <div>Sounds: <span style="color:var(--glow)">9 MP3 + Custom</span></div>
+    </div>
+  </div>
+</div>
 
-  btn.classList.add('active');
-}
+<div class="status-bar">
+  <div><span class="status-dot"></span>ONLINE</div>
+  <div id="alarmCount">0 ALARMS</div>
+  <div>v4.0.0</div>
+</div>
+</div>
 
-let alarms = [];
+<script>
+let alarms=JSON.parse(localStorage.getItem('alarms')||'[]');
+let settings=JSON.parse(localStorage.getItem('settings')||'{"homeTz":"Asia/Kolkata","use24h":false,"theme":"cyber","lang":"en"}');
+let selectedSound='rooster',customSoundURL=null,ringingId=null,snoozeCount=0;
+let timerInterval=null,timerRemaining=0,timerRunning=false;
+let swInterval=null,swRunning=false,swElapsed=0,swLapTime=0,laps=[];
 
-function addAlarm(){
-  const time = document.getElementById('alarmTime').value;
+const soundFiles={rooster:'sounds/Rooster.mp3',bell:'sounds/Bell.mp3',beep:'sounds/Beep.mp3',chime:'sounds/chime.mp3',buzz:'sounds/Buzz.mp3',digital:'sounds/Digital.mp3',rain:'sounds/Rain.mp3',birds:'sounds/bird.mp3',ocean:'sounds/Ocean.mp3'};
+const soundNames={rooster:'🐓 Rooster',bell:'🔔 Bell',beep:'📡 Beep',chime:'🎵 Chime',buzz:'⚡ Buzz',digital:'💻 Digital',rain:'🌧 Rain',birds:'🐦 Birds',ocean:'🌊 Ocean',custom:'🎵 Custom'};
 
-  if(!time){
-    alert('Select alarm time');
-    return;
-  }
+const worldCities=[
+  {city:'INDIA',tz:'Asia/Kolkata',flag:'🇮🇳'},{city:'UK',tz:'Europe/London',flag:'🇬🇧'},
+  {city:'CANADA E',tz:'America/Toronto',flag:'🇨🇦'},{city:'USA EAST',tz:'America/New_York',flag:'🇺🇸'},
+  {city:'USA WEST',tz:'America/Los_Angeles',flag:'🇺🇸'},{city:'DUBAI',tz:'Asia/Dubai',flag:'🇦🇪'},
+  {city:'AUSTRALIA',tz:'Australia/Sydney',flag:'🇦🇺'},{city:'JAPAN',tz:'Asia/Tokyo',flag:'🇯🇵'},
+  {city:'FRANCE',tz:'Europe/Paris',flag:'🇫🇷'},{city:'CANADA W',tz:'America/Vancouver',flag:'🇨🇦'},
+  {city:'GERMANY',tz:'Europe/Berlin',flag:'🇩🇪'},{city:'CHINA',tz:'Asia/Shanghai',flag:'🇨🇳'},
+  {city:'BRAZIL',tz:'America/Sao_Paulo',flag:'🇧🇷'},{city:'RUSSIA',tz:'Europe/Moscow',flag:'🇷🇺'},
+  {city:'KOREA',tz:'Asia/Seoul',flag:'🇰🇷'},{city:'SINGAPORE',tz:'Asia/Singapore',flag:'🇸🇬'},
+  {city:'PAKISTAN',tz:'Asia/Karachi',flag:'🇵🇰'},{city:'ITALY',tz:'Europe/Rome',flag:'🇮🇹'},
+  {city:'SPAIN',tz:'Europe/Madrid',flag:'🇪🇸'},{city:'MEXICO',tz:'America/Mexico_City',flag:'🇲🇽'},
+  {city:'EGYPT',tz:'Africa/Cairo',flag:'🇪🇬'},{city:'TURKEY',tz:'Europe/Istanbul',flag:'🇹🇷'},
+  {city:'INDONESIA',tz:'Asia/Jakarta',flag:'🇮🇩'},{city:'NIGERIA',tz:'Africa/Lagos',flag:'🇳🇬'},
+  {city:'ARGENTINA',tz:'America/Argentina/Buenos_Aires',flag:'🇦🇷'},{city:'THAILAND',tz:'Asia/Bangkok',flag:'🇹🇭'},
+  {city:'VIETNAM',tz:'Asia/Ho_Chi_Minh',flag:'🇻🇳'},{city:'SAUDI',tz:'Asia/Riyadh',flag:'🇸🇦'},
+  {city:'BANGLADESH',tz:'Asia/Dhaka',flag:'🇧🇩'},{city:'NETHERLANDS',tz:'Europe/Amsterdam',flag:'🇳🇱'}
+];
 
-  alarms.push(time);
-  renderAlarms();
-}
+const themes={
+  cyber:{name:'Cyber',bg:'#060a0f',panel:'#0d1520',border:'#1a3a5c',glow:'#00d4ff',text:'#cde8ff',dim:'#3a6080'},
+  dark:{name:'Dark',bg:'#0a0a0a',panel:'#141414',border:'#2a2a2a',glow:'#ffffff',text:'#e0e0e0',dim:'#555'},
+  green:{name:'Matrix',bg:'#010f01',panel:'#021402',border:'#0a3a0a',glow:'#00ff41',text:'#ccffcc',dim:'#1a5c1a'},
+  purple:{name:'Purple',bg:'#0a0514',panel:'#120a1e',border:'#2a1a4a',glow:'#bf5fff',text:'#e8ccff',dim:'#5a3a80'},
+  sunset:{name:'Sunset',bg:'#0f0805',panel:'#1e100a',border:'#4a2010',glow:'#ff6b35',text:'#ffe0cc',dim:'#804020'},
+  light:{name:'Light',bg:'#f0f4f8',panel:'#ffffff',border:'#c0d0e0',glow:'#0066cc',text:'#1a2a3a',dim:'#7a9ab0'}
+};
 
-function renderAlarms(){
-  const list = document.getElementById('alarmList');
+const langs={
+  en:{name:'English',flag:'🇬🇧'},hi:{name:'हिंदी',flag:'🇮🇳'},
+  ar:{name:'العربية',flag:'🇸🇦'},fr:{name:'Français',flag:'🇫🇷'},
+  es:{name:'Español',flag:'🇪🇸'},de:{name:'Deutsch',flag:'🇩🇪'},
+  ja:{name:'日本語',flag:'🇯🇵'},zh:{name:'中文',flag:'🇨🇳'},
+  pt:{name:'Português',flag:'🇧🇷'},ru:{name:'Русский',flag:'🇷🇺'},
+  ko:{name:'한국어',flag:'🇰🇷'},id:{name:'Indonesia',flag:'🇮🇩'},
+  tr:{name:'Türkçe',flag:'🇹🇷'},it:{name:'Italiano',flag:'🇮🇹'},
+  ur:{name:'اردو',flag:'🇵🇰'},bn:{name:'বাংলা',flag:'🇧🇩'},
+  vi:{name:'Tiếng Việt',flag:'🇻🇳'},th:{name:'ภาษาไทย',flag:'🇹🇭'},
+  nl:{name:'Nederlands',flag:'🇳🇱'},pl:{name:'Polski',flag:'🇵🇱'}
+};
 
-  list.innerHTML = '';
-
-  alarms.forEach((alarm,index)=>{
-    const div = document.createElement('div');
-
-    div.className = 'alarm-item';
-
-    div.innerHTML = `
-      <span>${alarm}</span>
-      <button class="delete-btn" onclick="deleteAlarm(${index})">Delete</button>
-    `;
-
-    list.appendChild(div);
-  });
-}
-
-function deleteAlarm(index){
-  alarms.splice(index,1);
-  renderAlarms();
-}
-
-setInterval(()=>{
-  const now = new Date();
-
-  const current = now.toTimeString().slice(0,5);
-
-  alarms.forEach(alarm=>{
-    if(alarm === current){
-      alert('⏰ Alarm Ringing!');
-    }
-  });
-},1000);
-
-let timerInterval;
-
-function startTimer(){
-  let minutes = parseInt(document.getElementById('timerMinutes').value);
-
-  if(isNaN(minutes) || minutes <= 0){
-    alert('Enter valid minutes');
-    return;
-  }
-
-  let seconds = minutes * 60;
-
-  clearInterval(timerInterval);
-
-  timerInterval = setInterval(()=>{
-
-    let min = Math.floor(seconds / 60);
-    let sec = seconds % 60;
-
-    document.getElementById('timerDisplay').innerText =
-      `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-
-    seconds--;
-
-    if(seconds < 0){
-      clearInterval(timerInterval);
-      alert('⏰ Timer Finished!');
-    }
-
-  },1000);
-}
-
-let stopwatchInterval;
-let stopwatchRunning = false;
-let stopwatchSeconds = 0;
-
-function toggleStopwatch(){
-
-  if(!stopwatchRunning){
-
-    stopwatchRunning = true;
-
-    stopwatchInterval = setInterval(()=>{
-
-      stopwatchSeconds++;
-
-      const hrs = Math.floor(stopwatchSeconds / 3600);
-      const mins = Math.floor((stopwatchSeconds % 3600) / 60);
-      const secs = stopwatchSeconds % 60;
-
-      document.getElementById('stopwatchDisplay').innerText =
-        `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-
-    },1000);
-
-  }else{
-
-    stopwatchRunning = false;
-    clearInterval(stopwatchInterval);
-  }
-}
-</script></body>
-</html>
+const tr={
+  en:{alarm:'ALARM',timer:'TIMER',watch:'WATCH',world:'WORLD',set:'SET',setAlarm:'SET NEW ALARM',chooseSound:'CHOOSE SOUND',myAlarms:'MY ALARMS',noAlarms:'[ NO ALARMS SET ]',setBtn:'+ SET ALARM',wakeup:'⏰ ALARM RINGING!',stop:'■ STOP',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ CUSTOM',timerTxt:'COUNTDOWN TIMER',stopwatch:'STOPWATCH',worldClock:'WORLD CLOCK',theme:'THEME',language:'LANGUAGE',appSet:'APP SETTINGS',tz:'🌍 HOME TIMEZONE',h24:'🌙 24 HOUR FORMAT',clear:'🗑 CLEAR ALL ALARMS',gradual:'📈 GRADUAL VOLUME',gradualD:'Slowly gets louder',vibr:'📳 VIBRATION',vibrD:'Vibrate on alarm',snooze:'SNOOZE',vol:'🔊 VOLUME',custom:'🎵 Custom Sound',upload:'📁 Upload MP3/WAV',timesup:"⏰ TIME'S UP!",start:'▶ START',pause:'⏸ PAUSE',reset:'↺ RESET',lap:'🏁 LAP'},
+  hi:{alarm:'अलार्म',timer:'टाइमर',watch:'स्टॉपवॉच',world:'विश्व',set:'सेटिंग',setAlarm:'नया अलार्म सेट करें',chooseSound:'ध्वनि चुनें',myAlarms:'मेरे अलार्म',noAlarms:'[ कोई अलार्म नहीं ]',setBtn:'+ अलार्म सेट करें',wakeup:'⏰ उठो! अलार्म बज रहा है!',stop:'■ बंद करें',snooze5:'😴 5 मिनट',snooze10:'😴 10 मिनट',snoozeC:'⏱ कस्टम',timerTxt:'काउंटडाउन टाइमर',stopwatch:'स्टॉपवॉच',worldClock:'विश्व घड़ी',theme:'थीम',language:'भाषा',appSet:'ऐप सेटिंग',tz:'🌍 समय क्षेत्र',h24:'🌙 24 घंटे',clear:'🗑 सभी अलार्म हटाएं',gradual:'📈 धीरे धीरे',gradualD:'धीरे-धीरे तेज होती है',vibr:'📳 कंपन',vibrD:'अलार्म पर कंपन',snooze:'स्नूज़',vol:'🔊 आवाज़',custom:'🎵 कस्टम ध्वनि',upload:'📁 MP3/WAV अपलोड करें',timesup:'⏰ समय हो गया!',start:'▶ शुरू',pause:'⏸ रोकें',reset:'↺ रीसेट',lap:'🏁 लैप'},
+  ar:{alarm:'منبه',timer:'مؤقت',watch:'إيقاف',world:'العالم',set:'إعداد',setAlarm:'ضبط منبه جديد',chooseSound:'اختر صوتاً',myAlarms:'منبهاتي',noAlarms:'[ لا توجد منبهات ]',setBtn:'+ ضبط منبه',wakeup:'⏰ المنبه يرن!',stop:'■ إيقاف',snooze5:'😴 5 دقائق',snooze10:'😴 10 دقائق',snoozeC:'⏱ مخصص',timerTxt:'العد التنازلي',stopwatch:'ساعة إيقاف',worldClock:'ساعة العالم',theme:'المظهر',language:'اللغة',appSet:'إعدادات',tz:'🌍 المنطقة الزمنية',h24:'🌙 24 ساعة',clear:'🗑 مسح المنبهات',gradual:'📈 صوت تدريجي',gradualD:'يزداد تدريجياً',vibr:'📳 اهتزاز',vibrD:'اهتزاز عند المنبه',snooze:'غفوة',vol:'🔊 الصوت',custom:'🎵 صوت مخصص',upload:'📁 رفع MP3/WAV',timesup:'⏰ انتهى الوقت!',start:'▶ ابدأ',pause:'⏸ توقف',reset:'↺ إعادة',lap:'🏁 لفة'},
+  fr:{alarm:'ALARME',timer:'MINUTEUR',watch:'CHRONO',world:'MONDE',set:'RÉGLAGES',setAlarm:'NOUVELLE ALARME',chooseSound:'CHOISIR SON',myAlarms:'MES ALARMES',noAlarms:'[ AUCUNE ALARME ]',setBtn:'+ RÉGLER',wakeup:'⏰ RÉVEIL!',stop:'■ ARRÊT',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSO',timerTxt:'MINUTEUR',stopwatch:'CHRONOMÈTRE',worldClock:'HORLOGE MONDIALE',theme:'THÈME',language:'LANGUE',appSet:'PARAMÈTRES',tz:'🌍 FUSEAU',h24:'🌙 FORMAT 24H',clear:'🗑 EFFACER',gradual:'📈 PROGRESSIF',gradualD:'Monte progressivement',vibr:'📳 VIBRATION',vibrD:"Vibrer à l'alarme",snooze:'RAPPEL',vol:'🔊 VOLUME',custom:'🎵 Son Perso',upload:'📁 Importer MP3/WAV',timesup:'⏰ TEMPS ÉCOULÉ!',start:'▶ DÉBUT',pause:'⏸ PAUSE',reset:'↺ RESET',lap:'🏁 TOUR'},
+  es:{alarm:'ALARMA',timer:'TEMPORIZADOR',watch:'CRONÓMETRO',world:'MUNDO',set:'AJUSTES',setAlarm:'NUEVA ALARMA',chooseSound:'ELEGIR SONIDO',myAlarms:'MIS ALARMAS',noAlarms:'[ SIN ALARMAS ]',setBtn:'+ PONER ALARMA',wakeup:'⏰ ¡ALARMA!',stop:'■ PARAR',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ PERSONALIZADO',timerTxt:'TEMPORIZADOR',stopwatch:'CRONÓMETRO',worldClock:'RELOJ MUNDIAL',theme:'TEMA',language:'IDIOMA',appSet:'CONFIGURACIÓN',tz:'🌍 ZONA HORARIA',h24:'🌙 FORMATO 24H',clear:'🗑 BORRAR',gradual:'📈 GRADUAL',gradualD:'Sube gradualmente',vibr:'📳 VIBRACIÓN',vibrD:'Vibrar en alarma',snooze:'POSPONER',vol:'🔊 VOLUMEN',custom:'🎵 Sonido Perso',upload:'📁 Subir MP3/WAV',timesup:'⏰ ¡TIEMPO!',start:'▶ INICIO',pause:'⏸ PAUSA',reset:'↺ RESET',lap:'🏁 VUELTA'},
+  de:{alarm:'ALARM',timer:'TIMER',watch:'STOPPUHR',world:'WELT',set:'EINST.',setAlarm:'NEUER ALARM',chooseSound:'TON WÄHLEN',myAlarms:'MEINE ALARME',noAlarms:'[ KEINE ALARME ]',setBtn:'+ ALARM STELLEN',wakeup:'⏰ ALARM!',stop:'■ STOP',snooze5:'😴 5 MIN',snooze10:'😴 10 MIN',snoozeC:'⏱ BENUTZER',timerTxt:'COUNTDOWN',stopwatch:'STOPPUHR',worldClock:'WELTUHR',theme:'DESIGN',language:'SPRACHE',appSet:'EINSTELLUNGEN',tz:'🌍 ZEITZONE',h24:'🌙 24H FORMAT',clear:'🗑 LÖSCHEN',gradual:'📈 SANFT',gradualD:'Wird langsam lauter',vibr:'📳 VIBRATION',vibrD:'Vibration bei Alarm',snooze:'SCHLUMMER',vol:'🔊 LAUTSTÄRKE',custom:'🎵 Eigener Ton',upload:'📁 MP3/WAV Laden',timesup:'⏰ ZEIT UM!',start:'▶ START',pause:'⏸ PAUSE',reset:'↺ RESET',lap:'🏁 RUNDE'},
+  ja:{alarm:'アラーム',timer:'タイマー',watch:'ストップ',world:'世界',set:'設定',setAlarm:'アラーム設定',chooseSound:'サウンド選択',myAlarms:'マイアラーム',noAlarms:'[ アラームなし ]',setBtn:'+ 設定',wakeup:'⏰ アラーム！',stop:'■ 停止',snooze5:'😴 5分',snooze10:'😴 10分',snoozeC:'⏱ カスタム',timerTxt:'カウントダウン',stopwatch:'ストップウォッチ',worldClock:'世界時計',theme:'テーマ',language:'言語',appSet:'アプリ設定',tz:'🌍 タイムゾーン',h24:'🌙 24時間',clear:'🗑 全削除',gradual:'📈 徐々に',gradualD:'徐々に大きくなります',vibr:'📳 バイブ',vibrD:'アラーム時に振動',snooze:'スヌーズ',vol:'🔊 音量',custom:'🎵 カスタム音',upload:'📁 MP3/WAV',timesup:'⏰ 時間です！',start:'▶ スタート',pause:'⏸ 停止',reset:'↺ リセット',lap:'🏁 ラップ'},
+  zh:{alarm:'闹钟',timer:'计时',watch:'秒表',world:'世界',set:'设置',setAlarm:'设置闹钟',chooseSound:'选择声音',myAlarms:'我的闹钟',noAlarms:'[ 没有闹钟 ]',setBtn:'+ 设置',wakeup:'⏰ 闹钟响了！',stop:'■ 停止',snooze5:'😴 5分钟',snooze10:'😴 10分钟',snoozeC:'⏱ 自定义',timerTxt:'倒计时',stopwatch:'秒表',worldClock:'世界时钟',theme:'主题',language:'语言',appSet:'应用设置',tz:'🌍 时区',h24:'🌙 24小时',clear:'🗑 清除',gradual:'📈 渐强'
