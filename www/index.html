@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Neo Alarm Clock (Fixed)</title>
+<title>Neo Alarm Clock</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-/* ═══ CSS STYLES ═══ */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#060a0f;--panel:#0d1520;--border:#1a3a5c;--glow:#00d4ff;--glow2:#ff6b35;--red:#ff3b3b;--green:#00ff9d;--text:#cde8ff;--dim:#3a6080}
 body{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;font-family:'Share Tech Mono',monospace;color:var(--text);overflow-x:hidden;padding:10px;user-select:none;}
@@ -125,6 +124,7 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
 .sound-status{font-size:.55rem;color:var(--green);margin-top:2px;min-height:14px}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--glow);color:var(--glow);font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:10px 20px;border-radius:4px;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
+.sound-badge{font-size:.48rem;color:var(--green);display:block;margin-top:2px;letter-spacing:.05em}
 </style>
 </head>
 <body>
@@ -197,15 +197,15 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
         </div>
         <div class="sl" data-t="chooseSound">CHOOSE SOUND</div>
         <div class="sound-grid" id="soundGrid">
-          <button class="sound-btn selected" onclick="selSound('rooster',this)">🐓 Rooster</button>
-          <button class="sound-btn" onclick="selSound('bell',this)">🔔 Bell</button>
-          <button class="sound-btn" onclick="selSound('beep',this)">📡 Beep</button>
-          <button class="sound-btn" onclick="selSound('chime',this)">🎵 Chime</button>
-          <button class="sound-btn" onclick="selSound('buzz',this)">⚡ Buzz</button>
-          <button class="sound-btn" onclick="selSound('digital',this)">💻 Digital</button>
-          <button class="sound-btn" onclick="selSound('rain',this)">🌧 Rain</button>
-          <button class="sound-btn" onclick="selSound('birds',this)">🐦 Birds</button>
-          <button class="sound-btn" onclick="selSound('ocean',this)">🌊 Ocean</button>
+          <button class="sound-btn selected" onclick="selSound('rooster',this)">🐓 Rooster<span class="sound-badge" id="badge-rooster">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('bell',this)">🔔 Bell<span class="sound-badge" id="badge-bell">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('beep',this)">📡 Beep<span class="sound-badge" id="badge-beep">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('chime',this)">🎵 Chime<span class="sound-badge" id="badge-chime">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('buzz',this)">⚡ Buzz<span class="sound-badge" id="badge-buzz">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('digital',this)">💻 Digital<span class="sound-badge" id="badge-digital">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('rain',this)">🌧 Rain<span class="sound-badge" id="badge-rain">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('birds',this)">🐦 Birds<span class="sound-badge" id="badge-birds">loading...</span></button>
+          <button class="sound-btn" onclick="selSound('ocean',this)">🌊 Ocean<span class="sound-badge" id="badge-ocean">loading...</span></button>
           <button class="sound-btn" onclick="selSound('custom',this)" style="grid-column:span 3" id="customSoundBtn" data-t="customSound">🎵 Custom Sound</button>
         </div>
         <div id="soundStatus" class="sound-status"></div>
@@ -230,17 +230,4 @@ input[type=range]{flex:1;accent-color:var(--glow);cursor:pointer}
         <div class="sl" data-t="snooze">SNOOZE</div>
         <div class="row">
           <select id="snoozeTime"><option value="5">5 min</option><option value="10" selected>10 min</option><option value="15">15 min</option></select>
-          <select id="snoozeLimit"><option value="1">1x</option><option value="2">2x</option><option value="3" selected>3x</option><option value="5">5x</option><option value="99">Unlimited</option></select>
-        </div>
-        <button class="btn btn-primary" onclick="addAlarm()" style="width:100%" data-t="setBtn">+ SET ALARM</button>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="sl" data-t="myAlarms">MY ALARMS</div>
-      <div class="alarm-list" id="alarmList"><div class="no-alarms" data-t="noAlarms">[ NO ALARMS SET ]</div></div>
-    </div>
-  </div>
-
-  <div class="page" id="page-timer">
-    <div class="panel">
-      <div class="sl" data-t="timerLabel">COUNTDOWN 
+          <select id="snoozeLimit"><option value="1">1x</option><option value="2">2x</
