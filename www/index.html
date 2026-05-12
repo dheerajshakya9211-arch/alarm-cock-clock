@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test AI</title>
+</head>
+<body>
+
+<h2>Image Upload Test</h2>
+
+<input type="file" id="fileInput">
+<button onclick="send()">Analyze</button>
+
+<script>
+const BACKEND_URL = 'http://127.0.0.1:3000';
+
+let base64 = '';
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function(){
+    base64 = reader.result.split(',')[1];
+  };
+  reader.readAsDataURL(file);
+});
+
+async function send(){
+  const res = await fetch(BACKEND_URL + '/analyze', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ image: base64 })
+  });
+
+  const data = await res.json();
+  console.log(data);
+  alert(JSON.stringify(data, null, 2));
+}
+</script>
+
+</body>
+</html>
