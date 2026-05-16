@@ -1905,6 +1905,8 @@ document.getElementById('toggle24h').addEventListener('click', function() {
   this.classList.toggle('active');
   STATE.settings.is24h = this.classList.contains('active');
   saveState();
+  updateClock();
+  updateWorldClocks();
 });
 
 document.getElementById('homeTzSelect').addEventListener('change', e => {
